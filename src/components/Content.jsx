@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import InteractiveMap from './InteractiveMap'
+import mapData from '../mapData/ascent.json'
+import {fetchMapData, findMapUuidByName} from '../services/mapService'
 
 export default function Content() {
     const [data, setData] = useState(null)
@@ -7,58 +9,97 @@ export default function Content() {
     const [error, setError] = useState(null)
     const [mapUUID, setMapUUID] = useState(null)
 
-    useEffect(() => {
-        if (!mapUUID) return
-
-        fetch(`https://valorant-api.com/v1/maps/${mapUUID}`)
-            .then(response => response.json())
-            .then(data => {
-                // console.log(data.data)
-                setData(data.data)
-                setIsLoading(false)
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error)
-                setError(error)
-                setIsLoading(false)
-            })
-    }, [mapUUID])
-
     const [image, setImage] = useState(null)
+    const [imageCoords, setImageCoords] = useState(null)
     const [mapName, setMapName] = useState(null)
+    const [ascentImages, setAscentImages] = useState([])
+    const [ascentCallouts, setAscentCallouts] = useState([])
 
     useEffect(() => {
-        const maps = ["fracture", "pearl", "breeze", "haven", "bind", "split"];
+        const maps = ["ascent"];
         const randomMap = maps[Math.floor(Math.random() * maps.length)];
-        const images = {
-            fracture: ["B_Main.png"],
-            pearl: ["Top_Mid.png"],
-            breeze: ["A_Main.png"],
-            haven: ["A_Main.png"],
-            bind: ["A_Main.png"],
-            split: ["A_Main.png"],
-        };
-        const randomImage = images[randomMap][Math.floor(Math.random() * images[randomMap].length)];
-
-        setImage(randomImage);
         setMapName(randomMap);
+
+        const images = [];
+        const callouts = [];
+        mapData.map_data.forEach(map => {
+            if (map.difficulty === "easy") {
+                map.callouts.forEach(callout => {
+                    const filename = map.difficulty + "/" + callout.regionName + "_" + callout.superRegionName + ".png";
+                    images.push(filename);
+                    callouts.push(callout);
+                });
+            }
+        });
+        setAscentImages(images);
+        setAscentCallouts(callouts);
     }, []);
 
     useEffect(() => {
-        fetch("https://valorant-api.com/v1/maps/")
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.data)
-                data.data.forEach(map => {
-                    if (map.displayName.toLowerCase() === mapName) {
-                        setMapUUID(map.uuid)
-                    }
-                })
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error)
-            })
-    }, [mapName])
+        if (!mapName) return;
+
+        async function getMapUuid() {
+            try {
+                setIsLoading(true);
+                const uuid = await findMapUuidByName(mapName);
+                console.log("UUID:", uuid);
+                setMapUUID(uuid);
+            } catch (error) {
+                console.error('Error finding map UUID:', error);
+                setError(error);
+                setIsLoading(false);
+            }
+        }
+
+        getMapUuid();
+    }, [mapName]);
+
+    useEffect(() => {
+        if (!mapUUID) return;
+
+        async function getMapData() {
+            try {
+                const fetchedData = await fetchMapData(mapUUID);
+                setData(fetchedData);
+                setIsLoading(false);
+
+                setRandomImage();
+            } catch (error) {
+                console.error('Error fetching map data:', error);
+                setError(error);
+                setIsLoading(false);
+            }
+        }
+
+        getMapData();
+    }, [mapUUID]);
+
+    const setRandomImage = () => {
+        const images = {
+            fracture: ["B_Main.png"],
+            pearl: ["Top_Mid.png"],
+            ascent: ascentImages
+        };
+
+        const callouts = {
+            fracture: [],
+            pearl: [],
+            ascent: ascentCallouts
+        };
+
+        if (!mapName || !images[mapName] || images[mapName].length === 0) {
+            setError(new Error(`No images available for map: ${mapName}`));
+            return;
+        }
+
+        const randomNum = Math.floor(Math.random() * images[mapName].length);
+
+        const randomImage = images[mapName][randomNum];
+        setImage(randomImage);
+
+        const randomCallouts = callouts[mapName][randomNum];
+        setImageCoords(randomCallouts.location);
+    };
 
     if (isLoading) {
         return (
@@ -81,10 +122,20 @@ export default function Content() {
         )
     }
 
+    if (!data || !image) {
+        return (
+            <div className="flex h-screen w-screen items-center justify-center bg-[var(--background)]">
+                <div className="text-[var(--primary-color)] text-2xl">
+                    No map data available
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center p-8">
-            <div className="flex space-x-8 w-full max-w-7xl">
-                <div className="w-1/2 flex items-center justify-center flex-col">
+        <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center">
+            <div className="flex space-x-8 w-full max-w-[80%]">
+                <div className="w-2/3 flex items-center justify-center flex-col">
                     <h2 className="text-[var(--primary-color)] text-2xl font-bold mb-4">
                         Find the spot
                     </h2>
@@ -100,7 +151,8 @@ export default function Content() {
                     <InteractiveMap
                         image={data.displayIcon}
                         name={data.displayName}
-                        mapData={data}
+                        mapData={mapData}
+                        imageCoords={imageCoords}
                     />
 
                     <button

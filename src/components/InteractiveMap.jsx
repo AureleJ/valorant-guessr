@@ -1,52 +1,30 @@
-import React, {useEffect, useRef, useState} from "react";
-import * as dat from 'dat.gui';
+import React, {useEffect, useState} from "react";
+import {GUI} from "dat.gui";
 
-export default function InteractiveMap({image, name, mapData}) {
+export default function InteractiveMap({image, name, mapData, imageCoords}) {
     const [position, setPosition] = useState(null);
     const [callouts, setCallouts] = useState([]);
-    const mapRef = useRef(null);
-
-    // Debug states
-    const [xMultiplier, setXMultiplier] = useState(mapData.xMultiplier);
-    const [yMultiplier, setYMultiplier] = useState(mapData.yMultiplier);
-    const [xScalarToAdd, setXScalarToAdd] = useState(mapData.xScalarToAdd);
-    const [yScalarToAdd, setYScalarToAdd] = useState(mapData.yScalarToAdd);
+    const [activeCallout, setActiveCallout] = useState(false);
+    const [drawCallout, setDrawCallout] = useState(false);
+    const [distance, setDistance] = useState(null);
 
     useEffect(() => {
-        if (!mapRef.current) return;
-        if (mapData && mapData.callouts) {
-            const transformedCallouts = mapData.callouts.map(callout => {
-                const gameX = callout.location.x;
-                const gameY = callout.location.y;
+        mapData.map_data.forEach(map => {
+            if (map.difficulty === "easy") {
+                const transformedCallouts = map.callouts.map(callout => {
+                    const translatedPercentX = callout.location.x * 100.0;
+                    const translatedPercentY = callout.location.y * 100.0;
+                    return {
+                        ...callout,
+                        translatedPercentX,
+                        translatedPercentY,
+                    };
+                });
 
-                let translatedX = gameY * xMultiplier + xScalarToAdd;
-                let translatedY = gameX * yMultiplier + yScalarToAdd;
-
-                translatedX *= 577;
-                translatedY *= 577;
-
-                return {
-                    ...callout,
-                    translatedX,
-                    translatedY,
-                };
-            });
-
-            setCallouts(transformedCallouts);
-        }
-    }, [mapData, xMultiplier, yMultiplier, xScalarToAdd, yScalarToAdd]);
-
-    useEffect(() => {
-        const gui = new dat.GUI();
-        gui.add({ xMultiplier }, 'xMultiplier', -0.0001, 0.0001, 0.000000000001).onChange(setXMultiplier);
-        gui.add({ yMultiplier }, 'yMultiplier', -0.0001, 0.0001, 0.000000000001).onChange(setYMultiplier);
-        gui.add({ xScalarToAdd }, 'xScalarToAdd', -1, 1, 0.01).onChange(setXScalarToAdd);
-        gui.add({ yScalarToAdd }, 'yScalarToAdd', -1, 1, 0.01).onChange(setYScalarToAdd);
-
-        return () => {
-            gui.destroy();
-        };
-    }, []);
+                setCallouts(transformedCallouts);
+            }
+        });
+    }, [mapData]);
 
     const getPosition = (e) => {
         const rect = e.target.getBoundingClientRect();
@@ -54,43 +32,89 @@ export default function InteractiveMap({image, name, mapData}) {
         const y = e.clientY - rect.top;
 
         setPosition({x, y});
-    }
+        console.log("Position:", x / rect.width, y / rect.height);
+
+        function distanceTwoPoints(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+
+        const distance = distanceTwoPoints(x / rect.width, y / rect.height, imageCoords.x, imageCoords.y) * 100;
+        setDistance(distance);
+        setDrawCallout(true);
+
+        console.log("Distances:", distance);
+    };
+
+    useEffect(() => {
+        const gui = new GUI();
+        const folder = gui.addFolder('Callouts');
+        folder.open();
+        folder.add({active: activeCallout}, 'active').onChange((value) => {
+            setActiveCallout(value);
+        });
+
+        return () => {
+            gui.destroy();
+        };
+    }, []);
 
     return (
-        <div className="relative">
+        <div className="relative h-full w-full border-2 border-red-800">
             <img
-                ref={mapRef}
                 src={image}
                 alt={`${name} Icon`}
-                className="h-full w-full object-contain cursor-crosshair"
+                className="relative h-full w-full object-contain cursor-crosshair"
                 onClick={getPosition}
             />
 
-            {callouts.map((callout, index) => (
+            {activeCallout && callouts.map((callout, index) => (
                 <div
                     key={index}
                     className="absolute"
                     style={{
-                        left: `${callout.translatedX}px`,
-                        top: `${callout.translatedY}px`,
+                        left: `${callout.translatedPercentX}%`,
+                        top: `${callout.translatedPercentY}%`,
                         transform: 'translate(-50%, -50%)'
                     }}
                 >
-                    <span
-                        className="bg-white text-black px-1 py-1 text-[0.5rem]">
-                        {callout.regionName} - {callout.superRegionName}
-                    </span>
+                    <div className="w-1 h-1 bg-red-500 rounded-full"/>
+                    <div
+                        className="bg-black bg-opacity-70 p-1 rounded shadow absolute -top-8 -left-1/2 transform -translate-x-1/2">
+                        {callout.regionName}
+                    </div>
                 </div>
             ))}
 
+            {drawCallout && (
+                <>
+                    <div className="absolute" style={{
+                        left: `${imageCoords.x * 100}%`,
+                        top: `${imageCoords.y * 100}%`,
+                        transform: 'translate(-50%, -50%)'
+                    }}>
+                        <div className="w-2 h-2 bg-red-500 rounded-full"/>
+                        <div
+                            className="bg-black bg-opacity-70 p-1 rounded shadow absolute -top-8 -left-1/2 transform -translate-x-1/2">
+                            {distance.toFixed(2) + "m"}
+                        </div>
+                    </div>
+
+                    <svg className="absolute top-0 left-0 pointer-events-none" width="100%" height="100%">
+                        <line x1={`${imageCoords.x * 100}%`} y1={`${imageCoords.y * 100}%`} x2={position.x}
+                              y2={position.y} stroke="red"/>
+                    </svg>
+                </>
+            )}
+
             {position && (
-                <div
-                    className="absolute"
-                    style={{top: `${position.y - 6}px`, left: `${position.x - 6}px`}}
-                >
+                <div className="absolute" style={{
+                    left: `${position.x}px`,
+                    top: `${position.y}px`,
+                    transform: 'translate(-50%, -50%)'
+                }}>
                     <div className="w-3 h-3 bg-blue-500 rounded-full"/>
                 </div>
             )}
         </div>
-    )
+    );
 }
