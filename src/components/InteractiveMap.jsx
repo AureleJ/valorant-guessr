@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {GUI} from "dat.gui";
+import {useGameSettings} from "../context/GameContext.jsx";
 
 export default function InteractiveMap({image, name, mapData, imageCoords}) {
     const [position, setPosition] = useState(null);
@@ -7,10 +8,11 @@ export default function InteractiveMap({image, name, mapData, imageCoords}) {
     const [activeCallout, setActiveCallout] = useState(false);
     const [drawCallout, setDrawCallout] = useState(false);
     const [distance, setDistance] = useState(null);
+    const {gameSettings} = useGameSettings();
 
     useEffect(() => {
         mapData.map_data.forEach(map => {
-            if (map.difficulty === "easy") {
+            if (map.difficulty === gameSettings.difficulty.toLowerCase()) {
                 const transformedCallouts = map.callouts.map(callout => {
                     const translatedPercentX = callout.location.x * 100.0;
                     const translatedPercentY = callout.location.y * 100.0;
@@ -87,7 +89,7 @@ export default function InteractiveMap({image, name, mapData, imageCoords}) {
 
             {drawCallout && (
                 <>
-                    <div className="absolute" style={{
+                    <div className="absolute pointer-events-none" style={{
                         left: `${imageCoords.x * 100}%`,
                         top: `${imageCoords.y * 100}%`,
                         transform: 'translate(-50%, -50%)'
@@ -107,12 +109,12 @@ export default function InteractiveMap({image, name, mapData, imageCoords}) {
             )}
 
             {position && (
-                <div className="absolute" style={{
+                <div className="absolute pointer-events-none" style={{
                     left: `${position.x}px`,
                     top: `${position.y}px`,
                     transform: 'translate(-50%, -50%)'
                 }}>
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"/>
+                    <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-black"/>
                 </div>
             )}
         </div>

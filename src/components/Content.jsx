@@ -1,38 +1,56 @@
-import React, {useEffect, useState} from 'react'
-import InteractiveMap from './InteractiveMap'
-import mapData from '../mapData/ascent.json'
-import {fetchMapData, findMapUuidByName} from '../services/mapService'
+import React, {useEffect, useState} from 'react';
+import InteractiveMap from './InteractiveMap';
+import {fetchMapData, findMapUuidByName} from '../services/mapService';
+import {useGameSettings} from '../context/GameContext';
+import Button from "./Button.jsx";
 
 export default function Content() {
-    const [data, setData] = useState(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState(null)
-    const [mapUUID, setMapUUID] = useState(null)
+    const [data, setData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [mapUUID, setMapUUID] = useState(null);
+    const [mapData, setMapData] = useState(null);
 
-    const [image, setImage] = useState(null)
-    const [imageCoords, setImageCoords] = useState(null)
-    const [mapName, setMapName] = useState(null)
-    const [ascentImages, setAscentImages] = useState([])
-    const [ascentCallouts, setAscentCallouts] = useState([])
+    const [image, setImage] = useState(null);
+    const [imageCoords, setImageCoords] = useState(null);
+    const [mapName, setMapName] = useState(null);
+    const [ascentImages, setAscentImages] = useState([]);
+    const [ascentCallouts, setAscentCallouts] = useState([]);
+
+    const {gameSettings} = useGameSettings();
+    console.log("Game Settings:", gameSettings);
 
     useEffect(() => {
-        const maps = ["ascent"];
-        const randomMap = maps[Math.floor(Math.random() * maps.length)];
-        setMapName(randomMap);
+        const fetchMapData = async () => {
+            try {
+                const response = await fetch('/maps/ascent/ascent.json');
+                const mapData = await response.json();
+                const maps = ["ascent"];
+                const randomMap = maps[Math.floor(Math.random() * maps.length)];
+                setMapName(randomMap);
 
-        const images = [];
-        const callouts = [];
-        mapData.map_data.forEach(map => {
-            if (map.difficulty === "easy") {
-                map.callouts.forEach(callout => {
-                    const filename = map.difficulty + "/" + callout.regionName + "_" + callout.superRegionName + ".png";
-                    images.push(filename);
-                    callouts.push(callout);
+                const images = [];
+                const callouts = [];
+                console.log("Map Data:", mapData);
+                setMapData(mapData);
+                mapData.map_data.forEach(map => {
+                    if (map.difficulty === gameSettings.difficulty.toLowerCase()) {
+                        map.callouts.forEach(callout => {
+                            const filename = map.difficulty + "/" + callout.regionName + "_" + callout.superRegionName + ".png";
+                            images.push(filename);
+                            callouts.push(callout);
+                        });
+                    }
                 });
+                setAscentImages(images);
+                setAscentCallouts(callouts);
+            } catch (error) {
+                console.error('Error fetching map data:', error);
+                setError(error);
             }
-        });
-        setAscentImages(images);
-        setAscentCallouts(callouts);
+        };
+
+        fetchMapData();
     }, []);
 
     useEffect(() => {
@@ -133,7 +151,16 @@ export default function Content() {
     }
 
     return (
-        <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center">
+        <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center flex-col">
+            <Button className="mb-4" onClick={() => window.location.reload()}>
+                Back to Menu
+            </Button>
+
+            <p className="text-[var(--primary-color)] text-2xl font-bold mb-4">Difficulté
+                : {gameSettings.difficulty}</p>
+            <p className="text-[var(--primary-color)] text-2xl font-bold mb-4">Cartes sélectionnées
+                : {gameSettings.selectedMaps.join(", ")}</p>
+
             <div className="flex space-x-8 w-full max-w-[80%]">
                 <div className="w-2/3 flex items-center justify-center flex-col">
                     <h2 className="text-[var(--primary-color)] text-2xl font-bold mb-4">
@@ -155,10 +182,8 @@ export default function Content() {
                         imageCoords={imageCoords}
                     />
 
-                    <button
-                        className="bg-[var(--secondary-color)] hover:bg-[var(--hover-color)] text-white font-bold py-2 px-4 rounded w-1/6">
-                        Spot
-                    </button>
+                    <Button onClick={setRandomImage}>Next Spot</Button>
+
                 </div>
             </div>
         </div>
