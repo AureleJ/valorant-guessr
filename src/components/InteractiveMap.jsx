@@ -1,14 +1,25 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {GUI} from "dat.gui";
 import {useGameSettings} from "../context/GameContext.jsx";
 
-export default function InteractiveMap({image, name, mapData, imageCoords}) {
+export default function InteractiveMap({image, name, mapData, imageCoords, validateGuess, onPositionSelect}) {
     const [position, setPosition] = useState(null);
     const [callouts, setCallouts] = useState([]);
     const [activeCallout, setActiveCallout] = useState(false);
-    const [drawCallout, setDrawCallout] = useState(false);
     const [distance, setDistance] = useState(null);
     const {gameSettings} = useGameSettings();
+    const [zoom, setZoom] = useState(1);
+    const [offset, setOffset] = useState({x: 0, y: 0});
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({x: 0, y: 0});
+    const containerRef = useRef(null);
+    const imageRef = useRef(null);
+    const [hideGuess, setHideGuess] = useState(false);
+
+    useEffect(() => {
+        if (!validateGuess)
+            setHideGuess(false);
+    }, [validateGuess]);
 
     useEffect(() => {
         mapData.map_data.forEach(map => {
@@ -29,48 +40,162 @@ export default function InteractiveMap({image, name, mapData, imageCoords}) {
     }, [mapData]);
 
     const getPosition = (e) => {
-        const rect = e.target.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const rect = imageRef.current.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / zoom;
+        const y = (e.clientY - rect.top) / zoom;
 
-        setPosition({x, y});
-        console.log("Position:", x / rect.width, y / rect.height);
+        const positionObj = {x, y};
+        setPosition(positionObj);
 
         function distanceTwoPoints(x1, y1, x2, y2) {
             return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
         }
 
-        const distance = distanceTwoPoints(x / rect.width, y / rect.height, imageCoords.x, imageCoords.y) * 100;
-        setDistance(distance);
-        setDrawCallout(true);
+        const calculatedDistance = distanceTwoPoints(x / rect.width, y / rect.height, imageCoords.x, imageCoords.y) * 100;
+        setDistance(calculatedDistance);
 
-        console.log("Distances:", distance);
+        if (onPositionSelect) {
+            onPositionSelect(positionObj, calculatedDistance);
+            setHideGuess(true);
+        }
     };
 
     useEffect(() => {
         const gui = new GUI();
-        const folder = gui.addFolder('Callouts');
+        const folder = gui.addFolder('Map Controls');
         folder.open();
-        folder.add({active: activeCallout}, 'active').onChange((value) => {
+        folder.add({active: activeCallout}, 'active').name('Show Callouts').onChange((value) => {
             setActiveCallout(value);
         });
+
+        folder.add({zoom: zoom}, 'zoom', 1, 5).step(0.1).name('Zoom Level').onChange((value) => {
+            setZoom(value);
+        });
+
+        folder.add({
+            reset: function () {
+                setZoom(1);
+                setOffset({x: 0, y: 0});
+            }
+        }, 'reset').name('Reset View');
 
         return () => {
             gui.destroy();
         };
-    }, []);
+    }, [zoom, activeCallout]);
 
-    return (
-        <div className="relative h-full w-full border-2 border-red-800">
-            <img
-                src={image}
-                alt={`${name} Icon`}
-                className="relative h-full w-full object-contain cursor-crosshair"
-                onClick={getPosition}
-            />
+    const handleWheel = (e) => {
+        e.preventDefault();
+        const delta = -Math.sign(e.deltaY) * 0.1;
+        const newZoom = Math.max(1, Math.min(5, zoom + delta));
 
-            {activeCallout && callouts.map((callout, index) => (
-                <div
+        if (newZoom !== zoom) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const newOffsetX = mouseX - (mouseX - offset.x) * (newZoom / zoom);
+            const newOffsetY = mouseY - (mouseY - offset.y) * (newZoom / zoom);
+
+            setZoom(newZoom);
+            setOffset({x: newOffsetX, y: newOffsetY});
+        }
+    };
+
+    const handleMouseDown = (e) => {
+        if (e.button === 0) {
+            e.preventDefault();
+            setIsDragging(true);
+            setDragStart({x: e.clientX, y: e.clientY});
+        }
+    };
+
+    const getBoundaries = () => {
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const imageRect = imageRef.current.getBoundingClientRect();
+
+        const minX = Math.min(0, containerRect.width - imageRect.width / zoom * zoom);
+        const maxX = 0;
+        const minY = Math.min(0, containerRect.height - imageRect.height / zoom * zoom);
+        const maxY = 0;
+
+        return {minX, maxX, minY, maxY};
+    };
+
+    const handleMouseMove = (e) => {
+        if (isDragging) {
+            const deltaX = e.clientX - dragStart.x;
+            const deltaY = e.clientY - dragStart.y;
+            let newX = offset.x + deltaX;
+            let newY = offset.y + deltaY;
+
+            const {minX, maxX, minY, maxY} = getBoundaries();
+
+            newX = Math.max(minX, Math.min(maxX, newX));
+            newY = Math.max(minY, Math.min(maxY, newY));
+
+            setOffset({x: newX, y: newY});
+            setDragStart({x: e.clientX, y: e.clientY});
+        }
+    };
+
+    const handleMouseUp = () => {
+        if (isDragging) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleClick = (e) => {
+        if (e.detail === 2 && !validateGuess) {
+            getPosition(e);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, [isDragging, dragStart, offset, zoom]);
+
+    useEffect(() => {
+        if (containerRef.current && imageRef.current) {
+            const {minX, maxX, minY, maxY} = getBoundaries();
+
+            let newX = Math.max(minX, Math.min(maxX, offset.x));
+            let newY = Math.max(minY, Math.min(maxY, offset.y));
+
+            if (newX !== offset.x || newY !== offset.y) {
+                setOffset({x: newX, y: newY});
+            }
+        }
+    }, [zoom]);
+
+    return (<div
+            ref={containerRef}
+            className="relative h-full border-2 border-red-800 overflow-hidden aspect-square"
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onClick={handleClick}
+        >
+            <div
+                ref={imageRef}
+                className="absolute h-full w-full origin-top-left transition-transform duration-50 select-none border-2 border-blue-800"
+                style={{
+                    transform: `scale(${zoom})`, left: `${offset.x}px`, top: `${offset.y}px`
+                }}
+            >
+                <img
+                    src={image}
+                    alt={`${name} Icon`}
+                    className="h-full w-full select-none"
+                    draggable="false"
+                />
+
+                {activeCallout && callouts.map((callout, index) => (<div
                     key={index}
                     className="absolute"
                     style={{
@@ -81,42 +206,41 @@ export default function InteractiveMap({image, name, mapData, imageCoords}) {
                 >
                     <div className="w-1 h-1 bg-red-500 rounded-full"/>
                     <div
-                        className="bg-black bg-opacity-70 p-1 rounded shadow absolute -top-8 -left-1/2 transform -translate-x-1/2">
+                        className="bg-black bg-opacity-70 p-1 rounded shadow absolute -top-8 -left-1/2 transform -translate-x-1/2 text-white text-xs">
                         {callout.regionName}
                     </div>
-                </div>
-            ))}
+                </div>))}
 
-            {drawCallout && (
-                <>
-                    <div className="absolute pointer-events-none" style={{
+                {validateGuess && position && (<div className="h-full w-full">
+                    <div className="absolute pointer-events-none"
+                         style={{
                         left: `${imageCoords.x * 100}%`,
                         top: `${imageCoords.y * 100}%`,
                         transform: 'translate(-50%, -50%)'
                     }}>
                         <div className="w-2 h-2 bg-red-500 rounded-full"/>
                         <div
-                            className="bg-black bg-opacity-70 p-1 rounded shadow absolute -top-8 -left-1/2 transform -translate-x-1/2">
-                            {distance.toFixed(2) + "m"}
+                            className="bg-black bg-opacity-70 p-1 rounded shadow absolute -top-8 -left-1/2 transform -translate-x-1/2 text-white text-xs">
+                            {distance !== null ? distance.toFixed(2) + "m" : ""}
                         </div>
                     </div>
 
-                    <svg className="absolute top-0 left-0 pointer-events-none" width="100%" height="100%">
-                        <line x1={`${imageCoords.x * 100}%`} y1={`${imageCoords.y * 100}%`} x2={position.x}
-                              y2={position.y} stroke="red"/>
+                    <svg className="absolute h-full w-full top-0 left-0 pointer-events-none" width="100%" height="100%">
+                        <line x1={`${imageCoords.x * 100}%`} y1={`${imageCoords.y * 100}%`}
+                              x2={position.x} y2={position.y} stroke="red" strokeWidth="1"/>
                     </svg>
-                </>
-            )}
+                </div>)}
 
-            {position && (
-                <div className="absolute pointer-events-none" style={{
-                    left: `${position.x}px`,
-                    top: `${position.y}px`,
-                    transform: 'translate(-50%, -50%)'
+                {hideGuess && position && (<div className="absolute pointer-events-none" style={{
+                    left: `${position.x}px`, top: `${position.y}px`, transform: 'translate(-50%, -50%)'
                 }}>
                     <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-black"/>
-                </div>
-            )}
+                </div>)}
+            </div>
+
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                Zoom: {zoom.toFixed(1)}x
+            </div>
         </div>
     );
 }

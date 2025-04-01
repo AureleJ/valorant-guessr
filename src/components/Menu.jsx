@@ -33,12 +33,12 @@ const CheckboxMaps = () => (
     <fieldset className="mb-6">
         <legend className="text-white text-lg font-medium mb-2">Maps</legend>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <RadioInput id="bind-map" name="maps" label="Bind" type="checkbox"/>
-            <RadioInput id="haven-map" name="maps" label="Haven" type="checkbox"/>
-            <RadioInput id="split-map" name="maps" label="Split" type="checkbox"/>
-            <RadioInput id="ascent-map" name="maps" label="Ascent" type="checkbox"/>
-            <RadioInput id="icebox-map" name="maps" label="Icebox" type="checkbox"/>
-            <RadioInput id="breeze-map" name="maps" label="Breeze" type="checkbox"/>
+            <RadioInput id="bind-map" name="maps" label="Bind" type="checkbox" defaultChecked/>
+            <RadioInput id="haven-map" name="maps" label="Haven" type="checkbox" defaultChecked/>
+            <RadioInput id="split-map" name="maps" label="Split" type="checkbox" defaultChecked/>
+            <RadioInput id="ascent-map" name="maps" label="Ascent" type="checkbox" defaultChecked/>
+            <RadioInput id="icebox-map" name="maps" label="Icebox" type="checkbox" defaultChecked/>
+            <RadioInput id="breeze-map" name="maps" label="Breeze" type="checkbox" defaultChecked/>
         </div>
     </fieldset>
 );
