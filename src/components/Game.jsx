@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import InteractiveMap from './InteractiveMap';
-import {fetchMapData, findMapUuidByName} from '../services/mapService';
 import Button from "./Button.jsx";
 import {useGameStore} from '../stores/gameStore';
 import Loader from "./Loader.jsx";
 import Error from "./Error.jsx";
+import sources from "../utils/sources";
+import {readJsonFile} from "../utils/jsonUtils.jsx";
+import {useEffect} from "react";
 
 export default function Game() {
-    const [data, setData] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    /*
     const [mapUUID, setMapUUID] = useState(null);
     const [mapData, setMapData] = useState(null);
 
@@ -155,7 +155,51 @@ export default function Game() {
         });
 
         setRandomImage();
-    };
+    };*/
+
+    const [data, setData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [image, setImage] = useState(null);
+    const [imageCoords, setImageCoords] = useState(null);
+    const [mapName, setMapName] = useState(null);
+    const [validGuess, setValidGuess] = useState(false);
+    const [currentDistance, setCurrentDistance] = useState(null);
+    const [score, setScore] = useState(null);
+    const [mapData, setMapData] = useState(null);
+
+    const {gameSettings, addImage, getImages, gameState} = useGameStore();
+
+    useEffect(() => {
+        sources.forEach(source => {
+            readJsonFile(source.path)
+                .then(data => {
+                    setData(data);
+                    data.map_data.forEach(map => {
+                        if (map.difficulty === gameSettings.difficulty.toLowerCase()) {
+                            map.callouts.forEach(callout => {
+                                addImage(callout);
+                            });
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error reading JSON file:", error);
+                });
+        });
+
+        setIsLoading(false);
+    }, [ gameSettings.difficulty, addImage ]);
+
+    useEffect(() => {
+        if (!data) return;
+        const images = getImages();
+        const randomNum = Math.floor(Math.random() * images.length);
+        const randomImage = images[randomNum].imageName;
+        setImage("maps/ascent/" + gameSettings.difficulty.toLowerCase() + "/" + randomImage);
+        setImageCoords(images[randomNum].location);
+        setMapName(images[randomNum].mapName);
+    }, [data]);
 
     if (isLoading) {
         return (
@@ -177,20 +221,16 @@ export default function Game() {
 
     return (
         <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center flex-col">
-            <p className="absolute top-0 left-2 text-[var(--primary-color)] text-2xl font-bold mb-4">Difficulté: {gameSettings.difficulty}</p>
-            <p className="absolute top-10 left-2 text-[var(--primary-color)] text-2xl font-bold mb-4">Cartes
-                sélectionnées: {gameSettings.maps.join(", ")}</p>
-
             <div className="flex space-x-8 w-full max-w-[80%]">
                 <div className="w-2/3 flex items-center justify-center flex-col">
                     <img
-                        src={`/maps/${mapName}/${image}`}
-                        alt={`${mapName} - ${image}`}
+                        src={image}
+                        alt={`${mapName} Icon`}
                         className="rounded-lg object-cover"
                     />
                 </div>
 
-                <div className="w-1/2 flex flex-col items-center justify-between p-6">
+                {/*<div className="w-1/2 flex flex-col items-center justify-between p-6">
                     <InteractiveMap
                         image={data.displayIcon}
                         name={data.displayName}
@@ -200,13 +240,13 @@ export default function Game() {
                         onPositionSelect={handlePositionSelect}
                     />
 
-                </div>
+                </div>*/}
             </div>
-            <div className="mt-4 flex flex-col items-center">
+            {/*<div className="mt-4 flex flex-col items-center">
 
                 {!validGuess ? (<Button onClick={handleValidateGuess}>Valider</Button>) : (
                     <Button onClick={handlePlayAgain}>Jouer encore</Button>)}
-            </div>
+            </div>*/}
 
             <div className="flex flex-col items-center justify-center mt-10 h-10">
                 {score !== null && (<div className="text-center">

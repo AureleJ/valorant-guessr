@@ -44,7 +44,10 @@ const CheckboxMaps = () => (
 );
 
 export default function Menu({onStartGame}) {
-    const { setGameSettings, startGame } = useGameStore();
+    const { startGame } = useGameStore();
+    const addSelectedMaps = useGameStore((state) => state.addSelectedMaps);
+    const setDifficulty = useGameStore((state) => state.setDifficulty);
+    const setRounds = useGameStore((state) => state.setRounds);
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -57,10 +60,9 @@ export default function Menu({onStartGame}) {
         console.log("Selected Maps:", selectedMaps);
         console.log("Selected Difficulty:", difficulty);
 
-        setGameSettings({
-            difficulty,
-            maps: selectedMaps,
-        });
+        addSelectedMaps(selectedMaps);
+        setDifficulty(difficulty);
+        setRounds(5);
 
         startGame();
         onStartGame();

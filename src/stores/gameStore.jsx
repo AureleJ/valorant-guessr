@@ -3,7 +3,8 @@ import { create } from 'zustand'
 export const useGameStore = create((set, get) => ({
     gameSettings: {
         difficulty: null,
-        maps: [],
+        selectedMaps: [],
+        rounds: null,
     },
     setGameSettings: (settings) => {
         set((state) => ({
@@ -13,18 +14,80 @@ export const useGameStore = create((set, get) => ({
             },
         }));
     },
-
-    gameState: {
-        score: 0,
-        round: 0,
-    },
-    setGameState: (state) => {
-        set((prevState) => ({
-            gameState: {
-                ...prevState.gameState,
-                ...state,
+    addSelectedMaps: (map) => {
+        set((state) => ({
+            gameSettings: {
+                ...state.gameSettings,
+                selectedMaps: [...state.gameSettings.selectedMaps, map],
             },
         }));
+    },
+    removeSelectedMaps: (map) => {
+        set((state) => ({
+            gameSettings: {
+                ...state.gameSettings,
+                selectedMaps: state.gameSettings.selectedMaps.filter((m) => m !== map),
+            },
+        }));
+    },
+    setDifficulty: (difficulty) => {
+        set((state) => ({
+            gameSettings: {
+                ...state.gameSettings,
+                difficulty,
+            },
+        }));
+    },
+    setRounds: (rounds) => {
+        set((state) => ({
+            gameSettings: {
+                ...state.gameSettings,
+                rounds,
+            },
+        }));
+    },
+
+
+    gameState: {
+        score: null,
+        round: null,
+        images: [],
+    },
+    setScore: (score) => {
+        set((state) => ({
+            gameState: {
+                ...state.gameState,
+                score,
+            },
+        }));
+    },
+    setRound: (round) => {
+        set((state) => ({
+            gameState: {
+                ...state.gameState,
+                round,
+            },
+        }));
+    },
+    addImage: (image) => {
+        set((state) => ({
+            gameState: {
+                ...state.gameState,
+                images: [...state.gameState.images, image],
+            },
+        }));
+    },
+    getImages: () => {
+        const { images } = get().gameState;
+        return images;
+    },
+    getScore: () => {
+        const { score } = get().gameState;
+        return score;
+    },
+    getRound: () => {
+        const { round } = get().gameState;
+        return round;
     },
 
     startGame: () => {
