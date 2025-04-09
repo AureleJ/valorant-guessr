@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
-import {GUI} from "dat.gui";
 import {useGameSettings} from "../context/GameContext.jsx";
+import {distanceTwoPoints} from "../utils/math.jsx";
 
 export default function InteractiveMap({image, name, mapData, imageCoords, validateGuess, onPositionSelect}) {
     const [position, setPosition] = useState(null);
@@ -40,19 +40,17 @@ export default function InteractiveMap({image, name, mapData, imageCoords, valid
     }, [mapData]);
 
     const getPosition = (e) => {
-        const rect = imageRef.current.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / zoom;
-        const y = (e.clientY - rect.top) / zoom;
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width / zoom;
+        const y = (e.clientY - rect.top) / rect.height / zoom;
+
+        console.log("e.clientX:", (e.clientX - rect.left) / rect.width, "e.clientY:", (e.clientY - rect.top) / rect.height);
 
         const positionObj = {x, y};
-        setPosition(positionObj);
+        const calculatedDistance = distanceTwoPoints(e.clientX, e.clientY, imageCoords.x, imageCoords.y) / 10;
 
-        function distanceTwoPoints(x1, y1, x2, y2) {
-            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-        }
-
-        const calculatedDistance = distanceTwoPoints(x / rect.width, y / rect.height, imageCoords.x, imageCoords.y) * 100;
         setDistance(calculatedDistance);
+        setPosition(positionObj);
 
         if (onPositionSelect) {
             onPositionSelect(positionObj, calculatedDistance);
@@ -60,32 +58,15 @@ export default function InteractiveMap({image, name, mapData, imageCoords, valid
         }
     };
 
-    useEffect(() => {
-        const gui = new GUI();
-        const folder = gui.addFolder('Map Controls');
-        folder.open();
-        folder.add({active: activeCallout}, 'active').name('Show Callouts').onChange((value) => {
-            setActiveCallout(value);
-        });
-
-        folder.add({zoom: zoom}, 'zoom', 1, 5).step(0.1).name('Zoom Level').onChange((value) => {
-            setZoom(value);
-        });
-
-        folder.add({
-            reset: function () {
-                setZoom(1);
-                setOffset({x: 0, y: 0});
-            }
-        }, 'reset').name('Reset View');
-
-        return () => {
-            gui.destroy();
-        };
-    }, [zoom, activeCallout]);
+    const updatePositionOnResize = () => {
+        const container = containerRef.current.getBoundingClientRect();
+        const x = position.x;
+        const y = position.y;
+        console.log("X:", x, "Y:", y);
+        setPosition({x, y});
+    };
 
     const handleWheel = (e) => {
-        e.preventDefault();
         const delta = -Math.sign(e.deltaY) * 0.1;
         const newZoom = Math.max(1, Math.min(5, zoom + delta));
 
@@ -104,7 +85,7 @@ export default function InteractiveMap({image, name, mapData, imageCoords, valid
 
     const handleMouseDown = (e) => {
         if (e.button === 0) {
-            e.preventDefault();
+            // e.preventDefault();
             setIsDragging(true);
             setDragStart({x: e.clientX, y: e.clientY});
         }
@@ -161,6 +142,20 @@ export default function InteractiveMap({image, name, mapData, imageCoords, valid
         };
     }, [isDragging, dragStart, offset, zoom]);
 
+    // On page resize
+    useEffect(() => {
+        const handleResize = () => {
+            updatePositionOnResize();
+            console.log("Resizing");
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        }
+    }, []);
+
     useEffect(() => {
         if (containerRef.current && imageRef.current) {
             const {minX, maxX, minY, maxY} = getBoundaries();
@@ -214,10 +209,10 @@ export default function InteractiveMap({image, name, mapData, imageCoords, valid
                 {validateGuess && position && (<div className="h-full w-full">
                     <div className="absolute pointer-events-none"
                          style={{
-                        left: `${imageCoords.x * 100}%`,
-                        top: `${imageCoords.y * 100}%`,
-                        transform: 'translate(-50%, -50%)'
-                    }}>
+                             left: `${imageCoords.x * 100}%`,
+                             top: `${imageCoords.y * 100}%`,
+                             transform: 'translate(-50%, -50%)'
+                         }}>
                         <div className="w-2 h-2 bg-red-500 rounded-full"/>
                         <div
                             className="bg-black bg-opacity-70 p-1 rounded shadow absolute -top-8 -left-1/2 transform -translate-x-1/2 text-white text-xs">
@@ -226,15 +221,14 @@ export default function InteractiveMap({image, name, mapData, imageCoords, valid
                     </div>
 
                     <svg className="absolute h-full w-full top-0 left-0 pointer-events-none" width="100%" height="100%">
-                        <line x1={`${imageCoords.x * 100}%`} y1={`${imageCoords.y * 100}%`}
-                              x2={position.x} y2={position.y} stroke="red" strokeWidth="1"/>
+                        <line x1={`${imageCoords.x * 100}%`} y1={`${imageCoords.y * 100}%`} x2={`${position.x * 100}%`} y2={`${position.y * 100}%`} stroke="red" strokeWidth="1"/>
                     </svg>
                 </div>)}
 
                 {hideGuess && position && (<div className="absolute pointer-events-none" style={{
-                    left: `${position.x}px`, top: `${position.y}px`, transform: 'translate(-50%, -50%)'
+                    left: `${position.x * 100}%`, top: `${position.y * 100}%`, transform: 'translate(-50%, -50%)'
                 }}>
-                    <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-black"/>
+                    <div className="bg-blue-400 rounded-full" style={{width: `${5}px`, height: `${5}px`}}/>
                 </div>)}
             </div>
 

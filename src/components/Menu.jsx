@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "./Button.jsx";
-import {useGameSettings} from "../context/GameContext.jsx";
+import { useGameStore } from '../stores/gameStore';
 
 const RadioInput = ({id, name, label, defaultChecked, type}) => (
     <div className="flex items-center gap-x-3">
@@ -33,18 +33,18 @@ const CheckboxMaps = () => (
     <fieldset className="mb-6">
         <legend className="text-white text-lg font-medium mb-2">Maps</legend>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <RadioInput id="bind-map" name="maps" label="Bind" type="checkbox" defaultChecked/>
-            <RadioInput id="haven-map" name="maps" label="Haven" type="checkbox" defaultChecked/>
-            <RadioInput id="split-map" name="maps" label="Split" type="checkbox" defaultChecked/>
+            {/*<RadioInput id="bind-map" name="maps" label="Bind" type="checkbox" defaultChecked/>*/}
+            {/*<RadioInput id="haven-map" name="maps" label="Haven" type="checkbox" defaultChecked/>*/}
+            {/*<RadioInput id="split-map" name="maps" label="Split" type="checkbox" defaultChecked/>*/}
             <RadioInput id="ascent-map" name="maps" label="Ascent" type="checkbox" defaultChecked/>
-            <RadioInput id="icebox-map" name="maps" label="Icebox" type="checkbox" defaultChecked/>
-            <RadioInput id="breeze-map" name="maps" label="Breeze" type="checkbox" defaultChecked/>
+            {/*<RadioInput id="icebox-map" name="maps" label="Icebox" type="checkbox" defaultChecked/>*/}
+            {/*<RadioInput id="breeze-map" name="maps" label="Breeze" type="checkbox" defaultChecked/>*/}
         </div>
     </fieldset>
 );
 
 export default function Menu({onStartGame}) {
-    const {setGameSettings} = useGameSettings();
+    const { setGameSettings, startGame } = useGameStore();
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -54,11 +54,16 @@ export default function Menu({onStartGame}) {
         const selectedMaps = formData.getAll("maps");
         const difficulty = formData.get("difficulty");
 
-        setGameSettings({difficulty, selectedMaps});
+        console.log("Selected Maps:", selectedMaps);
+        console.log("Selected Difficulty:", difficulty);
 
-        console.log("Données du formulaire:", {difficulty, selectedMaps});
+        setGameSettings({
+            difficulty,
+            maps: selectedMaps,
+        });
 
-        onStartGame(); // Lancer le jeu
+        startGame();
+        onStartGame();
     }
 
     return (

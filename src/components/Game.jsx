@@ -1,10 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import InteractiveMap from './InteractiveMap';
 import {fetchMapData, findMapUuidByName} from '../services/mapService';
-import {useGameSettings} from '../context/GameContext';
 import Button from "./Button.jsx";
+import {useGameStore} from '../stores/gameStore';
+import Loader from "./Loader.jsx";
+import Error from "./Error.jsx";
 
-export default function Content() {
+export default function Game() {
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,8 +24,8 @@ export default function Content() {
     const [currentDistance, setCurrentDistance] = useState(null);
     const [score, setScore] = useState(null);
 
-    const {gameSettings} = useGameSettings();
-    console.log("Game Settings:", gameSettings);
+    const {gameSettings, setGameState, gameState} = useGameStore();
+    console.log("Game Settings:", gameSettings.maps, "Random map", gameSettings.maps[Math.floor(Math.random() * gameSettings.maps.length)]);
 
     useEffect(() => {
         const fetchMapData = async () => {
@@ -147,37 +149,29 @@ export default function Content() {
         setCurrentDistance(null);
         setScore(null);
 
+        setGameState({
+            score: gameState.score + score,
+            round: gameState.round + 1,
+        });
+
         setRandomImage();
     };
 
     if (isLoading) {
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-[var(--background)]">
-                <div className="animate-pulse text-[var(--primary-color)] text-2xl">
-                    Loading map details...
-                </div>
-            </div>
+            <Loader>Loading map information...</Loader>
         )
     }
 
     if (error) {
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-[var(--background)] text-center">
-                <div className="text-[var(--secondary-color)] text-2xl">
-                    Failed to load map information
-                    <p className="text-[var(--primary-color)] text-base mt-4">Please try again later</p>
-                </div>
-            </div>
+            <Error>Failed to load map information</Error>
         )
     }
 
     if (!data || !image) {
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-[var(--background)]">
-                <div className="text-[var(--primary-color)] text-2xl">
-                    No map data available
-                </div>
-            </div>
+            <Error>Map data is not available</Error>
         )
     }
 
@@ -185,7 +179,7 @@ export default function Content() {
         <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center flex-col">
             <p className="absolute top-0 left-2 text-[var(--primary-color)] text-2xl font-bold mb-4">Difficulté: {gameSettings.difficulty}</p>
             <p className="absolute top-10 left-2 text-[var(--primary-color)] text-2xl font-bold mb-4">Cartes
-                sélectionnées: {gameSettings.selectedMaps.join(", ")}</p>
+                sélectionnées: {gameSettings.maps.join(", ")}</p>
 
             <div className="flex space-x-8 w-full max-w-[80%]">
                 <div className="w-2/3 flex items-center justify-center flex-col">
@@ -216,7 +210,8 @@ export default function Content() {
 
             <div className="flex flex-col items-center justify-center mt-10 h-10">
                 {score !== null && (<div className="text-center">
-                    <p className="text-[var(--primary-color)] text-xl font-bold">Score: {score}</p>
+                    <p className="text-[var(--primary-color)] text-xl font-bold">Score: {gameState.score}</p>
+                    <p className="text-[var(--primary-color)]">Round: {gameState.round}</p>
                     <p className="text-[var(--secondary-color)]">
                         Distance: {currentDistance.toFixed(2)}m
                     </p>
