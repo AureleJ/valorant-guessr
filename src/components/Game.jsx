@@ -150,7 +150,8 @@ export default function Game() {
                     <img
                         src={image}
                         alt={`${mapName} Icon`}
-                        className="rounded-lg object-cover"
+                        className="rounded-lg object-cover select-none"
+                        draggable={false}
                     />
                 </div>
 
