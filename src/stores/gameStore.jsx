@@ -1,127 +1,90 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
 
 export const useGameStore = create((set, get) => ({
+    // Paramètres du jeu
     gameSettings: {
-        difficulty: null,
-        selectedMaps: [],
-        rounds: null,
-    },
-    setGameSettings: (settings) => {
-        set((state) => ({
-            gameSettings: {
-                ...state.gameSettings,
-                ...settings,
-            },
-        }));
-    },
-    addSelectedMaps: (map) => {
-        set((state) => ({
-            gameSettings: {
-                ...state.gameSettings,
-                selectedMaps: [...state.gameSettings.selectedMaps, map],
-            },
-        }));
-    },
-    removeSelectedMaps: (map) => {
-        set((state) => ({
-            gameSettings: {
-                ...state.gameSettings,
-                selectedMaps: state.gameSettings.selectedMaps.filter((m) => m !== map),
-            },
-        }));
-    },
-    setDifficulty: (difficulty) => {
-        set((state) => ({
-            gameSettings: {
-                ...state.gameSettings,
-                difficulty,
-            },
-        }));
-    },
-    setRounds: (rounds) => {
-        set((state) => ({
-            gameSettings: {
-                ...state.gameSettings,
-                rounds,
-            },
-        }));
+        difficulty: 'Easy', // Par défaut
+        numRounds: 5,
+        showSolution: false,
     },
 
-
+    // État du jeu
     gameState: {
-        score: null,
-        round: null,
-        images: [],
-    },
-    setScore: (score) => {
-        set((state) => ({
-            gameState: {
-                ...state.gameState,
-                score,
-            },
-        }));
-    },
-    setRound: (round) => {
-        set((state) => ({
-            gameState: {
-                ...state.gameState,
-                round,
-            },
-        }));
-    },
-    addImage: (image) => {
-        set((state) => ({
-            gameState: {
-                ...state.gameState,
-                images: [...state.gameState.images, image],
-            },
-        }));
-    },
-    getImages: () => {
-        const { images } = get().gameState;
-        return images;
-    },
-    getScore: () => {
-        const { score } = get().gameState;
-        return score;
-    },
-    getRound: () => {
-        const { round } = get().gameState;
-        return round;
+        score: 0,
+        round: 1,
+        totalScore: 0,
     },
 
-    startGame: () => {
-        set((state) => ({
-            gameState: {
-                ...state.gameState,
-                score: 0,
-                round: 1,
-            },
-        }));
+    // Données de l'image actuelle
+    image: null,
+    imageCoords: null,
+    mapName: null,
+    currentDistance: null,
+    validGuess: false,
+
+    // Collection d'images
+    images: [],
+
+    // Flag d'initialisation
+    initialized: false,
+
+    // Actions
+    setGameSettings: (settings) => set({
+        gameSettings: { ...get().gameSettings, ...settings }
+    }),
+
+    addImage: (image) => set((state) => ({
+        images: [...state.images, image]
+    })),
+
+    getImages: () => get().images,
+
+    setImage: (image) => set({ image }),
+
+    setImageCoords: (coords) => set({ imageCoords: coords }),
+
+    setMapName: (name) => set({ mapName: name }),
+
+    setCurrentDistance: (distance) => set({ currentDistance: distance }),
+
+    setValidGuess: (isValid) => set({ validGuess: isValid }),
+
+    updateScore: (roundScore) => set((state) => ({
+        gameState: {
+            ...state.gameState,
+            score: state.gameState.score + roundScore,
+        }
+    })),
+
+    nextRound: () => set((state) => ({
+        gameState: {
+            ...state.gameState,
+            round: state.gameState.round + 1,
+        },
+        currentDistance: null,
+    })),
+
+    validateGuess: (guessPoint) => {
+        console.log('Validating guess:', guessPoint);
+        const { imageCoords } = get();
+        if (!imageCoords) return;
     },
 
-    gameStarted: false,
-    setGameStarted: (started) => {
-        set(() => ({
-            gameStarted: started,
-        }));
+    handlePlayAgain: () => {
+        // Cette fonction sera définie dans le composant Game
     },
 
-    gameOver: false,
-    setGameOver: (over) => {
-        set(() => ({
-            gameOver: over,
-        }));
-    },
-
-    resetGame: () => {
-        set(() => ({
-            gameState: {
-                score: 0,
-                round: 0,
-            },
-            gameStarted: false,
-            gameOver: false,
-        }));
-    },
+    resetGame: () => set({
+        gameState: {
+            score: 0,
+            round: 1,
+            totalScore: 0,
+        },
+        currentDistance: null,
+        validGuess: false,
+        gameSettings: {
+            ...get().gameSettings,
+            showSolution: false,
+        }
+    }),
 }));

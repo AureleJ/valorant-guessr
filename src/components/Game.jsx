@@ -1,204 +1,127 @@
-import React, {useState} from 'react';
-import InteractiveMap from './InteractiveMap';
-import Button from "./Button.jsx";
-import {useGameStore} from '../stores/gameStore';
+import React, { useEffect, useState } from 'react';
+import { useGameStore } from '../stores/gameStore';
 import Loader from "./Loader.jsx";
 import Error from "./Error.jsx";
 import sources from "../utils/sources";
-import {readJsonFile} from "../utils/jsonUtils.jsx";
-import {useEffect} from "react";
+import { readJsonFile } from "../utils/jsonUtils.jsx";
+import InteractiveMap from "./InteractiveMap.jsx";
 
 export default function Game() {
-    /*
-    const [mapUUID, setMapUUID] = useState(null);
-    const [mapData, setMapData] = useState(null);
-
-    const [image, setImage] = useState(null);
-    const [imageCoords, setImageCoords] = useState(null);
-    const [mapName, setMapName] = useState(null);
-    const [ascentImages, setAscentImages] = useState([]);
-    const [ascentCallouts, setAscentCallouts] = useState([]);
-
-    const [validGuess, setValidGuess] = useState(false);
-    const [selectedPosition, setSelectedPosition] = useState(null);
-    const [currentDistance, setCurrentDistance] = useState(null);
-    const [score, setScore] = useState(null);
-
-    const {gameSettings, setGameState, gameState} = useGameStore();
-    console.log("Game Settings:", gameSettings.maps, "Random map", gameSettings.maps[Math.floor(Math.random() * gameSettings.maps.length)]);
-
-    useEffect(() => {
-        const fetchMapData = async () => {
-            try {
-                const response = await fetch('/maps/ascent/ascent.json');
-                const mapData = await response.json();
-                const maps = ["ascent"];
-                const randomMap = maps[Math.floor(Math.random() * maps.length)];
-                setMapName(randomMap);
-
-                const images = [];
-                const callouts = [];
-                console.log("Map Data:", mapData);
-                setMapData(mapData);
-                mapData.map_data.forEach(map => {
-                    if (map.difficulty === gameSettings.difficulty.toLowerCase()) {
-                        map.callouts.forEach(callout => {
-                            const filename = map.difficulty + "/" + callout.regionName + "_" + callout.superRegionName + ".png";
-                            images.push(filename);
-                            callouts.push(callout);
-                        });
-                    }
-                });
-                setAscentImages(images);
-                setAscentCallouts(callouts);
-            } catch (error) {
-                console.error('Error fetching map data:', error);
-                setError(error);
-            }
-        };
-
-        fetchMapData();
-    }, []);
-
-    useEffect(() => {
-        if (!mapName) return;
-
-        async function getMapUuid() {
-            try {
-                setIsLoading(true);
-                const uuid = await findMapUuidByName(mapName);
-                console.log("UUID:", uuid);
-                setMapUUID(uuid);
-            } catch (error) {
-                console.error('Error finding map UUID:', error);
-                setError(error);
-                setIsLoading(false);
-            }
-        }
-
-        getMapUuid();
-    }, [mapName]);
-
-    useEffect(() => {
-        if (!mapUUID) return;
-
-        async function getMapData() {
-            try {
-                const fetchedData = await fetchMapData(mapUUID);
-                setData(fetchedData);
-                setIsLoading(false);
-
-                setRandomImage();
-            } catch (error) {
-                console.error('Error fetching map data:', error);
-                setError(error);
-                setIsLoading(false);
-            }
-        }
-
-        getMapData();
-    }, [mapUUID]);
-
-    const setRandomImage = () => {
-        const images = {
-            fracture: ["B_Main.png"],
-            pearl: ["Top_Mid.png"],
-            ascent: ascentImages
-        };
-
-        const callouts = {
-            fracture: [],
-            pearl: [],
-            ascent: ascentCallouts
-        };
-
-        if (!mapName || !images[mapName] || images[mapName].length === 0) {
-            setError(new Error(`No images available for map: ${mapName}`));
-            return;
-        }
-
-        const randomNum = Math.floor(Math.random() * images[mapName].length);
-
-        const randomImage = images[mapName][randomNum];
-        setImage(randomImage);
-
-        const randomCallouts = callouts[mapName][randomNum];
-        setImageCoords(randomCallouts.location);
-    };
-
-    const handlePositionSelect = (position, distance) => {
-        setSelectedPosition(position);
-        setCurrentDistance(distance);
-    };
-
-    const handleValidateGuess = () => {
-        if (!selectedPosition || currentDistance === null) {
-            alert("Please select a position on the map first!");
-            return;
-        }
-
-        setValidGuess(true);
-
-        const calculatedScore = Math.max(0, Math.round(100 - currentDistance));
-        setScore(calculatedScore);
-    };
-
-    const handlePlayAgain = () => {
-        setValidGuess(false);
-        setSelectedPosition(null);
-        setCurrentDistance(null);
-        setScore(null);
-
-        setGameState({
-            score: gameState.score + score,
-            round: gameState.round + 1,
-        });
-
-        setRandomImage();
-    };*/
-
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [image, setImage] = useState(null);
-    const [imageCoords, setImageCoords] = useState(null);
-    const [mapName, setMapName] = useState(null);
-    const [validGuess, setValidGuess] = useState(false);
-    const [currentDistance, setCurrentDistance] = useState(null);
-    const [score, setScore] = useState(null);
-    const [mapData, setMapData] = useState(null);
 
-    const {gameSettings, addImage, getImages, gameState} = useGameStore();
+    const {
+        gameSettings,
+        addImage,
+        getImages,
+        gameState,
+        setImageCoords,
+        setMapName,
+        image,
+        mapName,
+        imageCoords,
+        setImage,
+        currentDistance,
+        setCurrentDistance,
+        validGuess,
+        setValidGuess,
+        validateGuess,
+        handlePlayAgain,
+    } = useGameStore();
+
+    const gameStore = useGameStore.getState();
+
+    useEffect(() => {
+        if (!gameStore.initialized) {
+            gameStore.setCurrentDistance = (distance) => {
+                setCurrentDistance(distance);
+            };
+
+            gameStore.validateGuess = (guessPoint) => {
+                if (!imageCoords) return;
+
+                const distance = Math.sqrt(
+                    Math.pow(guessPoint.x - imageCoords.x, 2) +
+                    Math.pow(guessPoint.y - imageCoords.y, 2)
+                );
+
+                const distanceInMeters = distance * 0.25;
+                setCurrentDistance(distanceInMeters);
+
+                const maxDistance = 500;
+                const maxScore = 5000;
+                const score = Math.max(0, Math.round(maxScore * (1 - distanceInMeters / maxDistance)));
+
+                gameStore.updateScore(score);
+                setValidGuess(true);
+                gameStore.showSolution = true;
+            };
+
+            gameStore.handlePlayAgain = () => {
+                setValidGuess(false);
+                gameStore.showSolution = false;
+                gameStore.nextRound();
+
+                const images = getImages();
+                if (images.length === 0) return;
+
+                const randomNum = Math.floor(Math.random() * images.length);
+                const randomImage = images[randomNum]?.imageName;
+                if (!randomImage) return;
+
+                setImage("maps/" + mapName.toLowerCase() + "/" + gameSettings.difficulty.toLowerCase() + "/" + randomImage);
+                setImageCoords(images[randomNum]?.location);
+                setMapName(images[randomNum]?.mapName);
+            };
+
+            gameStore.initialized = true;
+        }
+    }, []);
 
     useEffect(() => {
         sources.forEach(source => {
             readJsonFile(source.path)
                 .then(data => {
                     setData(data);
-                    data.map_data.forEach(map => {
-                        if (map.difficulty === gameSettings.difficulty.toLowerCase()) {
-                            map.callouts.forEach(callout => {
-                                addImage(callout);
-                            });
-                        }
-                    });
+                    if (gameSettings.difficulty) {
+                        data.map_data.forEach(map => {
+                            if (map.difficulty === gameSettings.difficulty.toLowerCase()) {
+                                map.callouts.forEach(callout => {
+                                    addImage(callout);
+                                });
+                            }
+                        });
+                    } else {
+                        console.error("gameSettings.difficulty is null or undefined");
+                    }
                 })
                 .catch(error => {
-                    console.error("Error reading JSON file:", error);
+                    console.error("Error loading JSON file:", error);
+                    setError(error);
                 });
         });
 
         setIsLoading(false);
-    }, [ gameSettings.difficulty, addImage ]);
+    }, [gameSettings.difficulty, addImage]);
 
     useEffect(() => {
         if (!data) return;
+        console.log("Map Data:", data);
         const images = getImages();
+        if (images.length === 0) {
+            console.error("No images available");
+            return;
+        }
         const randomNum = Math.floor(Math.random() * images.length);
-        const randomImage = images[randomNum].imageName;
+        const randomImage = images[randomNum]?.imageName;
+        if (!randomImage) {
+            console.error("randomImage is undefined");
+            return;
+        }
         setImage("maps/ascent/" + gameSettings.difficulty.toLowerCase() + "/" + randomImage);
-        setImageCoords(images[randomNum].location);
-        setMapName(images[randomNum].mapName);
+        setImageCoords(images[randomNum]?.location);
+        setMapName(images[randomNum]?.mapName);
     }, [data]);
 
     if (isLoading) {
@@ -219,6 +142,7 @@ export default function Game() {
         )
     }
 
+
     return (
         <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center flex-col">
             <div className="flex space-x-8 w-full max-w-[80%]">
@@ -230,32 +154,32 @@ export default function Game() {
                     />
                 </div>
 
-                {/*<div className="w-1/2 flex flex-col items-center justify-between p-6">
-                    <InteractiveMap
-                        image={data.displayIcon}
-                        name={data.displayName}
-                        mapData={mapData}
-                        imageCoords={imageCoords}
-                        validateGuess={validGuess}
-                        onPositionSelect={handlePositionSelect}
-                    />
-
-                </div>*/}
+                <div className="w-1/2 flex flex-col items-center justify-between p-6 h-[500px]">
+                    <InteractiveMap imagePath={data.filePath + data.imageName} imgCoords={imageCoords} />
+                </div>
             </div>
-            {/*<div className="mt-4 flex flex-col items-center">
 
-                {!validGuess ? (<Button onClick={handleValidateGuess}>Valider</Button>) : (
-                    <Button onClick={handlePlayAgain}>Jouer encore</Button>)}
-            </div>*/}
+            <div className="mt-4 flex flex-col items-center">
+                {validGuess && (
+                    <button
+                        className="bg-[var(--primary-color)] text-white px-4 py-2 rounded-lg hover:bg-opacity-80"
+                        onClick={handlePlayAgain}
+                    >
+                        Jouer encore
+                    </button>
+                )}
+            </div>
 
             <div className="flex flex-col items-center justify-center mt-10 h-10">
-                {score !== null && (<div className="text-center">
-                    <p className="text-[var(--primary-color)] text-xl font-bold">Score: {gameState.score}</p>
-                    <p className="text-[var(--primary-color)]">Round: {gameState.round}</p>
-                    <p className="text-[var(--secondary-color)]">
-                        Distance: {currentDistance.toFixed(2)}m
-                    </p>
-                </div>)}
+                {currentDistance !== null && (
+                    <div className="text-center">
+                        <p className="text-[var(--primary-color)] text-xl font-bold">Score: {gameState.score}</p>
+                        <p className="text-[var(--primary-color)]">Round: {gameState.round}</p>
+                        <p className="text-[var(--secondary-color)]">
+                            Distance: {currentDistance.toFixed(2)}m
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     )

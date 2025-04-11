@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "./Button.jsx";
 import { useGameStore } from '../stores/gameStore';
+import { useNavigate } from "react-router-dom";
 
 const RadioInput = ({id, name, label, defaultChecked, type}) => (
     <div className="flex items-center gap-x-3">
@@ -43,11 +44,13 @@ const CheckboxMaps = () => (
     </fieldset>
 );
 
-export default function Menu({onStartGame}) {
+export default function Menu() {
     const { startGame } = useGameStore();
     const addSelectedMaps = useGameStore((state) => state.addSelectedMaps);
     const setDifficulty = useGameStore((state) => state.setDifficulty);
     const setRounds = useGameStore((state) => state.setRounds);
+
+    const navigate = useNavigate();
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -60,12 +63,12 @@ export default function Menu({onStartGame}) {
         console.log("Selected Maps:", selectedMaps);
         console.log("Selected Difficulty:", difficulty);
 
-        addSelectedMaps(selectedMaps);
+        // addSelectedMaps(selectedMaps);
         setDifficulty(difficulty);
         setRounds(5);
 
         startGame();
-        onStartGame();
+        navigate("/game");
     }
 
     return (
