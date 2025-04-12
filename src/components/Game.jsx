@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useGameStore } from '../stores/gameStore';
+import React, {useEffect, useState} from 'react';
+import {useGameStore} from '../stores/gameStore';
 import Loader from "./Loader.jsx";
 import Error from "./Error.jsx";
 import sources from "../utils/sources";
-import { readJsonFile } from "../utils/jsonUtils.jsx";
+import {readJsonFile} from "../utils/jsonUtils.jsx";
 import InteractiveMap from "./InteractiveMap.jsx";
+import Button from "./Button.jsx";
 
 export default function Game() {
     const [data, setData] = useState(null);
@@ -12,23 +13,25 @@ export default function Game() {
     const [error, setError] = useState(null);
 
     const {
-        gameSettings,
-        addImage,
-        getImages,
-        gameState,
+        setValidGuess,
+        validGuess,
+        setImage,
         setImageCoords,
         setMapName,
-        image,
-        mapName,
-        imageCoords,
-        setImage,
-        currentDistance,
         setCurrentDistance,
-        validGuess,
-        setValidGuess,
-        validateGuess,
-        handlePlayAgain,
+        imageCoords,
+        gameSettings,
+        gameState,
+        getImages,
+        nextRound,
+        haveGuessed,
+        mapName,
+        addImage,
+        image,
+        currentDistance,
     } = useGameStore();
+
+    console.log("haveGuessed", haveGuessed);
 
     const gameStore = useGameStore.getState();
 
@@ -144,9 +147,9 @@ export default function Game() {
 
 
     return (
-        <div className="flex h-screen w-screen bg-[var(--background)] items-center justify-center flex-col">
-            <div className="flex space-x-8 w-full max-w-[80%]">
-                <div className="w-2/3 flex items-center justify-center flex-col">
+        <div className="flex h-screen w-screen items-center justify-center flex-col">
+            <div className="relative flex max-w-[90%] items-center justify-center gap-4">
+                <div className="relative w-2/3 h-full flex items-center justify-center">
                     <img
                         src={image}
                         alt={`${mapName} Icon`}
@@ -155,24 +158,17 @@ export default function Game() {
                     />
                 </div>
 
-                <div className="w-1/2 flex flex-col items-center justify-between p-6 h-[500px]">
-                    <InteractiveMap imagePath={data.filePath + data.imageName} imgCoords={imageCoords} />
+                <div className="relative w-1/3 h-full flex flex-col items-center justify-center gap-4">
+                    <InteractiveMap imagePath={data.filePath + data.imageName} imgCoords={imageCoords}/>
+
+                    <Button onClick={setValidGuess} disabled={!haveGuessed}>
+                        Validate Guess
+                    </Button>
                 </div>
             </div>
 
-            <div className="mt-4 flex flex-col items-center">
-                {validGuess && (
-                    <button
-                        className="bg-[var(--primary-color)] text-white px-4 py-2 rounded-lg hover:bg-opacity-80"
-                        onClick={handlePlayAgain}
-                    >
-                        Jouer encore
-                    </button>
-                )}
-            </div>
-
-            <div className="flex flex-col items-center justify-center mt-10 h-10">
-                {currentDistance !== null && (
+            {validGuess && (
+                <div className="absolute bottom-0 -translate-y-1/2 z-10">
                     <div className="text-center">
                         <p className="text-[var(--primary-color)] text-xl font-bold">Score: {gameState.score}</p>
                         <p className="text-[var(--primary-color)]">Round: {gameState.round}</p>
@@ -180,8 +176,11 @@ export default function Game() {
                             Distance: {currentDistance.toFixed(2)}m
                         </p>
                     </div>
-                )}
-            </div>
+                    <Button onClick={nextRound} className="bg-green-500 hover:bg-green-600">
+                        Play Again
+                    </Button>
+                </div>
+            )}
         </div>
     )
 }

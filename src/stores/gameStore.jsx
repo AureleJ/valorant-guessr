@@ -21,6 +21,7 @@ export const useGameStore = create((set, get) => ({
     mapName: null,
     currentDistance: null,
     validGuess: false,
+    haveGuessed: false,
 
     // Collection d'images
     images: [],
@@ -48,6 +49,8 @@ export const useGameStore = create((set, get) => ({
     setCurrentDistance: (distance) => set({ currentDistance: distance }),
 
     setValidGuess: (isValid) => set({ validGuess: isValid }),
+
+    setHaveGuessed: (hasGuessed) => set({ haveGuessed: hasGuessed }),
 
     updateScore: (roundScore) => set((state) => ({
         gameState: {
