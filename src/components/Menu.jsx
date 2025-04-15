@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "./Button.jsx";
-import { useGameStore } from '../stores/gameStore';
-import { useNavigate } from "react-router-dom";
+import {useGameStore} from '../stores/gameStore';
+import {useNavigate} from "react-router-dom";
 
 const RadioInput = ({id, name, label, defaultChecked, type}) => (
     <div className="flex items-center gap-x-3">
@@ -19,36 +19,52 @@ const RadioInput = ({id, name, label, defaultChecked, type}) => (
     </div>
 );
 
-const CheckboxDifficulty = () => (
-    <fieldset className="mb-4">
-        <legend className="text-white text-lg font-medium mb-2">Difficulty</legend>
-        <div className="flex gap-x-6">
-            <RadioInput id="easy-difficulty" name="difficulty" label="Easy" defaultChecked type="radio"/>
-            <RadioInput id="medium-difficulty" name="difficulty" label="Medium" type="radio"/>
-            <RadioInput id="hard-difficulty" name="difficulty" label="Hard" type="radio"/>
-        </div>
-    </fieldset>
-);
+const CheckboxDifficulty = () => {
+    const {availableDifficulties} = useGameStore();
 
-const CheckboxMaps = () => (
-    <fieldset className="mb-6">
-        <legend className="text-white text-lg font-medium mb-2">Maps</legend>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-            {/*<RadioInput id="bind-map" name="maps" label="Bind" type="checkbox" defaultChecked/>*/}
-            {/*<RadioInput id="haven-map" name="maps" label="Haven" type="checkbox" defaultChecked/>*/}
-            {/*<RadioInput id="split-map" name="maps" label="Split" type="checkbox" defaultChecked/>*/}
-            <RadioInput id="ascent-map" name="maps" label="Ascent" type="checkbox" defaultChecked/>
-            {/*<RadioInput id="icebox-map" name="maps" label="Icebox" type="checkbox" defaultChecked/>*/}
-            {/*<RadioInput id="breeze-map" name="maps" label="Breeze" type="checkbox" defaultChecked/>*/}
-        </div>
-    </fieldset>
-);
+    return (
+        <fieldset className="mb-4">
+            <legend className="text-white text-lg font-medium mb-2">Difficulty</legend>
+            <div className="flex gap-x-2">
+                {availableDifficulties.map((difficulty, index) => (
+                    <RadioInput
+                        key={index}
+                        id={`difficulty-${index}`}
+                        name="difficulty"
+                        label={difficulty}
+                        type="radio"
+                        defaultChecked={index === 0}
+                    />
+                ))}
+            </div>
+        </fieldset>
+    );
+}
+
+const CheckboxMaps = () => {
+    const {availableMaps} = useGameStore();
+
+    return (
+        <fieldset className="mb-4">
+            <legend className="text-white text-lg font-medium mb-2">Maps</legend>
+            <div className="flex gap-x-2">
+                {availableMaps.map((map, index) => (
+                    <RadioInput
+                        key={index}
+                        id={`map-${index}`}
+                        name="maps"
+                        label={map}
+                        type="checkbox"
+                        defaultChecked
+                    />
+                ))}
+            </div>
+        </fieldset>
+    );
+}
 
 export default function Menu() {
-    const { startGame } = useGameStore();
-    const addSelectedMaps = useGameStore((state) => state.addSelectedMaps);
-    const setDifficulty = useGameStore((state) => state.setDifficulty);
-    const setRounds = useGameStore((state) => state.setRounds);
+    const {setGameSettings} = useGameStore();
 
     const navigate = useNavigate();
 
@@ -63,11 +79,18 @@ export default function Menu() {
         console.log("Selected Maps:", selectedMaps);
         console.log("Selected Difficulty:", difficulty);
 
-        // addSelectedMaps(selectedMaps);
-        // setDifficulty(difficulty);
-        // setRounds(5);
+        setGameSettings({
+            mapSelected: selectedMaps,
+            difficulty: difficulty,
+            numRounds: 5,
+        });
 
-        // startGame();
+        console.log("Game settings updated:", {
+            mapSelected: selectedMaps,
+            difficulty: difficulty,
+            numRounds: 5,
+        });
+
         navigate("/game");
     }
 

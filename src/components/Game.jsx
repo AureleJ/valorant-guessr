@@ -11,6 +11,7 @@ import {useNavigate} from "react-router-dom";
 export default function Game() {
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isImageLoading, setIsImageLoading] = useState(true);
     const [error, setError] = useState(null);
     const [endGame, setEndGame] = useState(false);
     const navigate = useNavigate();
@@ -42,17 +43,16 @@ export default function Game() {
                     if (!gameSettings.mapSelected.includes(source.mapName)) continue;
 
                     const data = await readJsonFile(source.path);
+                    const difficulty = gameSettings.difficulty.toLowerCase();
+                    const difficultyDataPath = data.filePath + data.mods[difficulty];
+                    console.log("Loading data from:", difficultyDataPath);
                     setData(data);
-
-                    const mapsData = data.map_data.filter(map =>
-                        map.difficulty === gameSettings.difficulty.toLowerCase()
-                    );
-
-                    mapsData.forEach(map => {
-                        map.callouts.forEach(callout => {
-                            callout.mapName = source.mapName;
-                            addImage(callout);
-                        });
+                    const mapsData = await readJsonFile(difficultyDataPath);
+                    console.log("Maps data loaded:", mapsData);
+                    const callouts = mapsData.callouts;
+                    callouts.forEach(callout => {
+                        callout.mapName = source.mapName;
+                        addImage(callout);
                     });
                 }
                 setIsLoading(false);
@@ -82,8 +82,11 @@ export default function Game() {
 
         const selectedMapName = randomImage.mapName;
         const imagePath = `maps/${selectedMapName.toLowerCase()}/${gameSettings.difficulty.toLowerCase()}/${randomImage.imageName}`;
+        console.log("Selected image path:", imagePath);
 
         markImageAsUsed(randomImage.id || randomImage.imageName);
+
+        setIsImageLoading(true);
         setImage(imagePath);
         setImageCoords(randomImage.location);
         setMapName(randomImage.mapName || selectedMapName);
@@ -111,9 +114,14 @@ export default function Game() {
         navigate('/');
     }
 
+    const handleImageLoad = () => {
+        setIsImageLoading(false);
+    }
+
     if (isLoading) return <Loader>Loading map information...</Loader>;
     if (error) return <Error>Failed to load map information</Error>;
     if (!data || !image) return <Error>Map data is not available</Error>;
+    if (!imageCoords) return <Error>Image coordinates are not available</Error>;
 
     return (
         <div className="flex h-screen w-screen items-center justify-center flex-col">
@@ -125,13 +133,20 @@ export default function Game() {
             </div>
 
             <div className="relative flex max-w-[90%] items-center justify-center gap-4">
-                <div className="relative w-2/3 h-full flex items-center justify-center">
+                <div className="relative w-2/3 h-full flex items-center justify-center min-w-[300px] rounded-lg overflow-hidden">
                     <img
                         src={image}
                         alt="Game view"
-                        className="rounded-lg object-cover select-none"
+                        className={"object-cover select-none"}
                         draggable={false}
+                        onLoad={handleImageLoad}
                     />
+                    {isImageLoading && (
+                        <div
+                            className="absolute flex items-center justify-center w-full h-full rounded-lg bg-gradient-to-br from-red to-gray-700">
+                            <Loader>Loading image...</Loader>
+                        </div>
+                    )}
                 </div>
 
                 <div className="relative w-1/3 h-full flex flex-col items-center justify-center gap-4">
@@ -168,7 +183,8 @@ export default function Game() {
             )}
 
             {endGame && (
-                <div className="absolute w-full h-full flex items-center justify-center flex-col gap-4 bg-black bg-opacity-50 backdrop-blur-sm">
+                <div
+                    className="absolute w-full h-full flex items-center justify-center flex-col gap-4 bg-black bg-opacity-50 backdrop-blur-sm z-20">
                     <p className="text-[var(--primary-color)] text-xl font-bold">Game Over</p>
                     <p className="text-[var(--primary-color)]">Score: {gameState.score}</p>
                     <Button

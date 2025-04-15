@@ -39,16 +39,16 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
 
     const toggleFullscreen = useCallback(() => {
         setFullscreen(prev => !prev);
+        toggleIsFullscreen();
         resetView();
     }, [resetView]);
 
     useEffect(() => {
         if (validGuess) {
-            toggleFullscreen();
             toggleIsFullscreen();
             setFullscreen(true);
         }
-    }, [validGuess, toggleFullscreen, toggleIsFullscreen]);
+    }, [validGuess, toggleIsFullscreen]);
 
     useEffect(() => {
         console.log("Fullscreen state changed:", isFullscreen);
@@ -62,6 +62,7 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
         const handleKeyDown = (e) => {
             if (fullscreen && e.key === "Escape") {
                 setFullscreen(false);
+                toggleIsFullscreen();
                 resetView();
             }
 
@@ -143,6 +144,8 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
         setPosition({ x, y });
         setDrawPing(true);
         setGamePosition({ x, y });
+
+        console.log("Clicked position:", { x, y });
 
         if (imgCoords) {
             const dist = distanceTwoPoints(x, y, imgCoords.x, imgCoords.y) * 100.0;

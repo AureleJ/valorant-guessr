@@ -3,10 +3,14 @@ import { create } from 'zustand';
 export const useGameStore = create((set, get) => ({
     // Game settings
     gameSettings: {
-        difficulty: 'Easy',
+        difficulty: "Easy",
         numRounds: 5,
-        mapSelected: ["Fracture", "Ascent"],
+        mapSelected: ["Ascent"],
     },
+
+    availableMaps: ["Ascent"],
+    availableDifficulties: ["Easy", "Medium", "Hard", "Spells"],
+    maxRoundsChoice: 5,
 
     // Game state
     gameState: {

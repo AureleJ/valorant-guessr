@@ -1,0 +1,23 @@
+{
+  "difficulty": "hard",
+  "callouts": [
+    {
+      "regionName": "A Site",
+      "superRegionName": "A",
+      "imageName": "maps/ascent/hard/A_Site_A.webp",
+      "location": {
+        "x": 0.3,
+        "y": 0.3
+      }
+    },
+    {
+      "regionName": "B Site",
+      "superRegionName": "B",
+      "imageName": "maps/ascent/hard/B_Site_B.webp",
+      "location": {
+        "x": 0.5,
+        "y": 0.3
+      }
+    }
+  ]
+}
