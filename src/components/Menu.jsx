@@ -64,10 +64,10 @@ export default function Menu() {
         console.log("Selected Difficulty:", difficulty);
 
         // addSelectedMaps(selectedMaps);
-        setDifficulty(difficulty);
-        setRounds(5);
+        // setDifficulty(difficulty);
+        // setRounds(5);
 
-        startGame();
+        // startGame();
         navigate("/game");
     }
 

@@ -1,0 +1,68 @@
+{
+  "id": "fracture",
+  "name": "Fracture",
+  "filePath": "maps/fracture/",
+  "imageName": "fracture.png",
+  "map_data": [
+    {
+      "difficulty": "easy",
+      "callouts": [
+        {
+          "regionName": "Main",
+          "superRegionName": "B",
+          "imageName": "Main_B.png",
+          "location": {
+            "x": 0.23,
+            "y": 0.87
+          }
+        }
+      ]
+    },
+    {
+      "difficulty": "medium",
+      "callouts": [
+        {
+          "regionName": "Top",
+          "superRegionName": "Mid",
+          "imageName": "maps/ascent/medium/Top_Mid.png",
+          "location": {
+            "x": 0.7,
+            "y": 0.1
+          }
+        },
+        {
+          "regionName": "A Lobby",
+          "superRegionName": "A",
+          "imageName": "maps/ascent/medium/A_Lobby_A.png",
+          "location": {
+            "x": 0.3,
+            "y": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "difficulty": "hard",
+      "callouts": [
+        {
+          "regionName": "A Site",
+          "superRegionName": "A",
+          "imageName": "maps/ascent/hard/A_Site_A.png",
+          "location": {
+            "x": 0.3,
+            "y": 0.3
+          }
+        },
+        {
+          "regionName": "B Site",
+          "superRegionName": "B",
+          "imageName": "maps/ascent/hard/B_Site_B.png",
+          "location": {
+            "x": 0.5,
+            "y": 0.3
+          }
+        }
+      ]
+    }
+  ]
+}
