@@ -14,6 +14,7 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [fullscreen, setFullscreen] = useState(false);
+    const [aspectRatio, setAspectRatio] = useState(1);
 
     const containerRef = useRef(null);
     const imageRef = useRef(null);
@@ -39,16 +40,8 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
 
     const toggleFullscreen = useCallback(() => {
         setFullscreen(prev => !prev);
-        toggleIsFullscreen();
         resetView();
     }, [resetView]);
-
-   /* useEffect(() => {
-        if (validGuess) {
-            toggleIsFullscreen();
-            setFullscreen(true);
-        }
-    }, [validGuess, toggleIsFullscreen]);*/
 
     useEffect(() => {
         console.log("Fullscreen state changed:", isFullscreen);
@@ -101,10 +94,13 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
 
         document.addEventListener("keydown", handleKeyDown);
         return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [fullscreen, resetView, toggleFullscreen, setValidGuess, haveGuessed]);
+    }, [fullscreen, resetView, setValidGuess, haveGuessed]);
 
     useEffect(() => {
         const handleMouseUp = () => setIsDragging(false);
+        const handleMouseLeave = () => setIsDragging(false);
+        const handleTouchEnd = () => setIsDragging(false);
+        const handleTouchCancel = () => setIsDragging(false);
 
         const handleMouseMove = (e) => {
             if (!isDragging || !containerRef.current || !imageRef.current) return;
@@ -125,12 +121,61 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
             setDragStart({ x: e.clientX, y: e.clientY });
         };
 
+        const handleTouchMove = (e) => {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - dragStart.x;
+                const deltaY = touch.clientY - dragStart.y;
+                const container = containerRef.current.getBoundingClientRect();
+                const imageWidth = container.width * zoom;
+                const imageHeight = container.height * zoom;
+                const maxOffsetX = (imageWidth - container.width) / 2;
+                const maxOffsetY = (imageHeight - container.height) / 2;
+                const newOffsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offset.x + deltaX));
+                const newOffsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offset.y + deltaY));
+                setOffset({ x: newOffsetX, y: newOffsetY });
+                setDragStart({ x: touch.clientX, y: touch.clientY });
+            } else if (e.touches.length === 2) {
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const distance = Math.sqrt(
+                    Math.pow(touch2.clientX - touch1.clientX, 2) +
+                    Math.pow(touch2.clientY - touch1.clientY, 2)
+                );
+                const newZoom = Math.max(1, Math.min(5, distance / 100));
+                const scaleFactor = newZoom / zoom;
+                const rect = containerRef.current.getBoundingClientRect();
+                const mouseX = ((touch1.clientX - rect.left) - (rect.width / 2));
+                const mouseY = ((touch1.clientY - rect.top) - (rect.height / 2));
+                const newOffsetX = (offset.x - mouseX) * scaleFactor + mouseX;
+                const newOffsetY = (offset.y - mouseY) * scaleFactor + mouseY;
+                const imageWidth = rect.width * newZoom;
+                const imageHeight = rect.height * newZoom;
+                const maxOffsetX = (imageWidth - rect.width) / 2;
+                const maxOffsetY = (imageHeight - rect.height) / 2;
+                setOffset({
+                    x: Math.min(maxOffsetX, Math.max(-maxOffsetX, newOffsetX)),
+                    y: Math.min(maxOffsetY, Math.max(-maxOffsetY, newOffsetY))
+                });
+                setZoom(newZoom);
+            }
+        };
+
         document.addEventListener("mouseup", handleMouseUp);
         document.addEventListener("mousemove", handleMouseMove);
+
+       document.addEventListener("mouseleave", handleMouseLeave);
+       document.addEventListener("touchend", handleTouchEnd);
+       document.addEventListener("touchcancel", handleTouchCancel);
+       document.addEventListener("touchmove", handleTouchMove);
 
         return () => {
             document.removeEventListener("mouseup", handleMouseUp);
             document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseleave", handleMouseLeave);
+            document.removeEventListener("touchend", handleTouchEnd);
+            document.removeEventListener("touchcancel", handleTouchCancel);
+            document.removeEventListener("touchmove", handleTouchMove);
         };
     }, [isDragging, dragStart, zoom, offset]);
 
@@ -193,16 +238,46 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
         }
     }, [validGuess, getPosition]);
 
+    const handleTouchStart = useCallback((e) => {
+        console.log("Touch start:", e.touches.length);
+        if (e.touches.length === 1) {
+            setIsDragging(true);
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+            console.log("Touch coordinates:", e.touches[0], { x, y });
+            setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        }
+    }, []);
+
+    useEffect(() => {
+        const updateAspectRatio = () => {
+            if (containerRef.current) {
+                const container = containerRef.current.getBoundingClientRect();
+                setAspectRatio(container.width / container.height);
+                console.log("Aspect ratio updated:", container.width, container.height, container.width / container.height);
+            }
+        };
+
+        updateAspectRatio();
+
+        window.addEventListener("resize", updateAspectRatio);
+        return () => {
+            window.removeEventListener("resize", updateAspectRatio);
+        };
+    }, [fullscreen]);
+
     return (
         <div className="relative w-full h-full">
             <div
                 ref={containerRef}
-                className={`bg-[--second-background] rounded-lg overflow-hidden aspect-square cursor-crosshair flex justify-center ${
+                className={`bg-[--second-background] rounded-lg overflow-hidden aspect-square cursor-crosshair flex justify-center items-center
+                ${
                     fullscreen ? "fixed top-0 left-0 transform h-screen w-screen z-10 bg-black backdrop-blur-sm bg-opacity-80" : "relative w-full"
                 }`}
                 onWheel={handleWheel}
                 onMouseDown={handleMouseDown}
                 onClick={handleClick}
+                onTouchStart ={handleTouchStart}
             >
                 <div className="absolute z-20 top-2 left-2 flex gap-2 flex-col">
                     <button onClick={toggleFullscreen} className="bg-[--card-background] text-white px-2 py-1 rounded">
@@ -214,9 +289,11 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
                 </div>
                 <div
                     ref={imageRef}
-                    className="absolute h-full select-none aspect-square"
+                    className="absolute select-none overflow-hidden aspect-square h-full"
                     style={{
                         transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+                        width: aspectRatio > 1 ? "auto" : "100%",
+                        height: aspectRatio > 1 ? "100%" : "auto",
                     }}
                 >
                     <img

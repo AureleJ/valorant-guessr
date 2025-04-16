@@ -22,11 +22,12 @@ const Button = ({
         ghost: "bg-transparent text-[var(--secondary-color)] hover:bg-[var(--secondary-color)/10] focus:ring-[var(--secondary-color)]"
     };
 
-    // Size styles
+    // Responsive size styles
     const sizeStyles = {
         small: "py-1 px-3 text-sm",
         medium: "py-2 px-5 text-base",
-        large: "py-3 px-6 text-lg"
+        large: "py-3 px-6 text-lg",
+        responsive: "py-2 px-4 text-sm sm:py-3 sm:px-6 sm:text-base md:py-4 md:px-8 md:text-lg"
     };
 
     // Disabled state

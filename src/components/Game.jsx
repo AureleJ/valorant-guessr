@@ -60,7 +60,9 @@ export default function Game() {
                     });
                 }
                 setIsLoading(false);
-                selectRandomImage();
+
+                if (!image)
+                    selectRandomImage();
             } catch (err) {
                 console.error("Error loading JSON file:", err);
                 setError(err);
@@ -129,6 +131,10 @@ export default function Game() {
 
     return (
         <div className="flex h-screen w-screen items-center justify-center flex-col">
+            <Button className={"absolute top-4 right-4"} onClick={backToHome}>
+                {translations.buttons.backToMenu}
+            </Button>
+
             <div className="absolute top-0 left-0 p-4">
                 {/*<p className="text-[var(--primary-color)]">{translations.map}: {gameSettings.mapName}</p>*/}
                 {/*<p className="text-[var(--primary-color)]">{translations.difficulty}: {translations.difficultyOptions[gameSettings.difficulty.toLowerCase()]}</p>*/}
@@ -136,8 +142,8 @@ export default function Game() {
                 <p className="text-[var(--primary-color)] text-xl font-bold">{translations.round}: {gameState.round}/{gameSettings.numRounds}</p>
             </div>
 
-            <div className="relative flex max-w-[90%] items-center justify-center gap-4">
-                <div className="relative w-2/3 h-full flex items-center justify-center min-w-[300px] rounded-lg overflow-hidden">
+            <div className="relative flex w-[90%] items-center justify-center gap-4 md:flex-row flex-col">
+                <div className="relative flex items-center justify-center w-full rounded-lg overflow-hidden">
                     <img
                         src={image}
                         alt="Game view"
@@ -153,7 +159,7 @@ export default function Game() {
                     )}
                 </div>
 
-                <div className="relative w-1/3 h-full flex flex-col items-center justify-center gap-4">
+                <div className="relative flex flex-col items-center justify-center gap-4 w-1/2 min-w-[300px]">
                     <InteractiveMap
                         imagePath={data.filePath + data.imageName}
                         imgCoords={imageCoords}

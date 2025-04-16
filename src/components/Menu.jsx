@@ -87,8 +87,8 @@ export default function Menu() {
         <div className="flex flex-col h-screen bg-[var(--background)] items-center justify-center relative">
 
             <form className="flex flex-col items-center justify-center flex-grow" onSubmit={handleSubmit}>
-                <h1 className="text-white text-4xl text-center pt-8 pb-6">{translations.optionsSelections}</h1>
-                <div className="p-10 flex flex-col gap-10">
+                <h2 className="text-white text-2xl text-center pt-8 pb-6">{translations.optionsSelections}</h2>
+                <div className="p-10 flex flex-col gap-5">
                     <CheckboxDifficulty title={translations.difficulties}/>
                     <CheckboxMaps title={translations.maps}/>
                     <div className="flex justify-center">

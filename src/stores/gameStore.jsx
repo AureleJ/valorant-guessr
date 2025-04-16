@@ -139,6 +139,9 @@ export const useGameStore = create((set, get) => ({
         usedImageIds: [],
         haveGuessed: false,
         drawPing: false,
-        isFullscreen: false,
+        images: [],
+        image: null,
+        imageCoords: null,
+        guessPosition: {x: null, y: null},
     }),
 }));
