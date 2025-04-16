@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import {create} from 'zustand';
 
 export const useGameStore = create((set, get) => ({
     // Game settings
@@ -9,8 +9,11 @@ export const useGameStore = create((set, get) => ({
     },
 
     availableMaps: ["Ascent"],
-    availableDifficulties: ["Easy", "Medium", "Hard", "Spells"],
+    availableDifficulties: ["Easy", "Spells"],
     maxRoundsChoice: 5,
+    maxRounds: 10,
+    maxDistance: 50,
+    maxScore: 5000,
 
     // Game state
     gameState: {
@@ -20,7 +23,7 @@ export const useGameStore = create((set, get) => ({
     },
 
     // Player interaction
-    guessPosition: { x: null, y: null },
+    guessPosition: {x: null, y: null},
     image: null,
     imageCoords: null,
     currentDistance: null,
@@ -37,12 +40,12 @@ export const useGameStore = create((set, get) => ({
 
     // Actions
     setGameSettings: (settings) => set({
-        gameSettings: { ...get().gameSettings, ...settings }
+        gameSettings: {...get().gameSettings, ...settings}
     }),
 
-    setGamePosition: (position) => set({ guessPosition: position }),
+    setGamePosition: (position) => set({guessPosition: position}),
 
-    setDrawPing: (draw) => set({ drawPing: draw }),
+    setDrawPing: (draw) => set({drawPing: draw}),
 
     addImage: (image) => set((state) => ({
         images: [...state.images, image]
@@ -51,7 +54,7 @@ export const useGameStore = create((set, get) => ({
     getImages: () => get().images,
 
     getUnusedImages: () => {
-        const { images, usedImageIds } = get();
+        const {images, usedImageIds} = get();
         return images.filter(img => !usedImageIds.includes(img.id || img.imageName));
     },
 
@@ -59,9 +62,9 @@ export const useGameStore = create((set, get) => ({
         usedImageIds: [...state.usedImageIds, imageId]
     })),
 
-    setImage: (image) => set({ image }),
+    setImage: (image) => set({image}),
 
-    setImageCoords: (coords) => set({ imageCoords: coords }),
+    setImageCoords: (coords) => set({imageCoords: coords}),
 
     setMapName: (name) => set((state) => ({
         mapName: name,
@@ -71,16 +74,16 @@ export const useGameStore = create((set, get) => ({
         }
     })),
 
-    setCurrentDistance: (distance) => set({ currentDistance: distance }),
+    setCurrentDistance: (distance) => set({currentDistance: distance}),
 
-    setHaveGuessed: (hasGuessed) => set({ haveGuessed: hasGuessed }),
+    setHaveGuessed: (hasGuessed) => set({haveGuessed: hasGuessed}),
 
-    setValidGuess: (isValid) => set({ validGuess: isValid }),
+    setValidGuess: (isValid) => set({validGuess: isValid}),
 
-    updateScore: (roundScore) => set((state) => ({
+    updateTotalScore: (roundScore) => set((state) => ({
         gameState: {
             ...state.gameState,
-            score: state.gameState.score + roundScore,
+            totalScore: state.gameState.totalScore + roundScore,
         }
     })),
 
@@ -102,11 +105,11 @@ export const useGameStore = create((set, get) => ({
 
     // Game logic
     validateGuess: (guessPoint) => {
-        const { imageCoords, setCurrentDistance } = get();
+        const {imageCoords, setCurrentDistance} = get();
         if (!imageCoords) return;
 
-        set({ validGuess: true });
-        set({ isFullscreen: false });
+        set({validGuess: true});
+        set({isFullscreen: false});
 
         const distance = Math.sqrt(
             Math.pow(guessPoint.x - imageCoords.x, 2) +
@@ -116,11 +119,13 @@ export const useGameStore = create((set, get) => ({
         const distanceInMeters = distance * 100;
         setCurrentDistance(distanceInMeters);
 
-        const maxDistance = 500;
-        const maxScore = 5000;
+        const maxDistance = get().maxDistance;
+        const maxScore = get().maxScore;
         const score = Math.max(0, Math.round(maxScore * (1 - distanceInMeters / maxDistance)));
 
-        get().updateScore(score);
+        set({gameState: {...get().gameState, score: score}});
+
+        get().updateTotalScore(score);
     },
 
     resetGame: () => set({

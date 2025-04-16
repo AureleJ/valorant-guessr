@@ -43,12 +43,12 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
         resetView();
     }, [resetView]);
 
-    useEffect(() => {
+   /* useEffect(() => {
         if (validGuess) {
             toggleIsFullscreen();
             setFullscreen(true);
         }
-    }, [validGuess, toggleIsFullscreen]);
+    }, [validGuess, toggleIsFullscreen]);*/
 
     useEffect(() => {
         console.log("Fullscreen state changed:", isFullscreen);

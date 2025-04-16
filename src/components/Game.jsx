@@ -7,6 +7,7 @@ import {readJsonFile} from "../utils/jsonUtils.jsx";
 import InteractiveMap from "./InteractiveMap.jsx";
 import Button from "./Button.jsx";
 import {useNavigate} from "react-router-dom";
+import {useLanguageStore} from "../stores/languageStore.jsx";
 
 export default function Game() {
     const [data, setData] = useState(null);
@@ -15,6 +16,8 @@ export default function Game() {
     const [error, setError] = useState(null);
     const [endGame, setEndGame] = useState(false);
     const navigate = useNavigate();
+
+    const translations = useLanguageStore(state => state.getCurrentTranslations());
 
     const {
         validateGuess,
@@ -29,6 +32,7 @@ export default function Game() {
         getUnusedImages,
         markImageAsUsed,
         nextRound,
+        maxScore,
         haveGuessed,
         addImage,
         image,
@@ -126,10 +130,10 @@ export default function Game() {
     return (
         <div className="flex h-screen w-screen items-center justify-center flex-col">
             <div className="absolute top-0 left-0 p-4">
-                <p className="text-[var(--primary-color)]">Map: {gameSettings.mapName}</p>
-                <p className="text-[var(--primary-color)]">Difficulty: {gameSettings.difficulty}</p>
-                <p className="text-[var(--primary-color)]">Round: {gameState.round}/{gameSettings.numRounds}</p>
-                <p className="text-[var(--primary-color)]">Score: {gameState.score}</p>
+                {/*<p className="text-[var(--primary-color)]">{translations.map}: {gameSettings.mapName}</p>*/}
+                {/*<p className="text-[var(--primary-color)]">{translations.difficulty}: {translations.difficultyOptions[gameSettings.difficulty.toLowerCase()]}</p>*/}
+                {/*<p className="text-[var(--primary-color)]">{translations.rounds}: {gameSettings.numRounds}</p>*/}
+                <p className="text-[var(--primary-color)] text-xl font-bold">{translations.round}: {gameState.round}/{gameSettings.numRounds}</p>
             </div>
 
             <div className="relative flex max-w-[90%] items-center justify-center gap-4">
@@ -159,16 +163,17 @@ export default function Game() {
                         onClick={() => validateGuess(guessPosition)}
                         disabled={!haveGuessed}
                     >
-                        Validate Guess
+                        {translations.buttons.validateGuess}
                     </Button>
                 </div>
             </div>
 
             {validGuess && (
-                <div className="absolute bottom-0 -translate-y-1/2 z-10">
+                <div className="absolute z-20 flex items-center justify-center flex-col gap-4 bg-black bg-opacity-50 backdrop-blur-sm w-full h-full">
                     <div className="text-center">
-                        <p className="text-[var(--primary-color)] text-xl font-bold">Score: {gameState.score}</p>
-                        <p className="text-[var(--primary-color)]">Round: {gameState.round}/{gameSettings.numRounds}</p>
+                        <p className="text-[var(--primary-color)] text-xl font-bold">Score de la manche : {gameState.score}</p>
+                        <p className="text-[var(--primary-color)] text-xl font-bold">Score total : {gameState.totalScore}</p>
+                        <p className="text-[var(--primary-color)]">{translations.rounds}: {gameState.round}/{gameSettings.numRounds}</p>
                         <p className="text-[var(--secondary-color)]">
                             Distance: {currentDistance.toFixed(2)}m
                         </p>
@@ -177,28 +182,35 @@ export default function Game() {
                         onClick={handleNextRound}
                         className="bg-green-500 hover:bg-green-600"
                     >
-                        {gameState.round >= gameSettings.numRounds ? "Voir le résultat final" : "Prochain Round"}
+                        {gameState.round >= gameSettings.numRounds ? translations.buttons.seeResults : translations.buttons.nextRound}
                     </Button>
                 </div>
             )}
 
             {endGame && (
                 <div
-                    className="absolute w-full h-full flex items-center justify-center flex-col gap-4 bg-black bg-opacity-50 backdrop-blur-sm z-20">
-                    <p className="text-[var(--primary-color)] text-xl font-bold">Game Over</p>
-                    <p className="text-[var(--primary-color)]">Score: {gameState.score}</p>
+                    className="absolute w-full h-full flex items-center justify-center flex-col gap-4 bg-black bg-opacity-70 backdrop-blur-sm z-20">
+                    <h2 className="text-[var(--primary-color)] text-2xl font-bold">{translations.scoreResultsTitle}</h2>
+                    <p className="text-[var(--primary-color)]">{translations.totalScore} : {gameState.totalScore} / {gameSettings.numRounds * maxScore}</p>
+                    <p className="text-[var(--primary-color)]">{translations.averageAccuracy} : {((gameState.totalScore / (gameSettings.numRounds * maxScore)) * 100).toFixed(2)}%</p>
+                    {((gameState.totalScore / (gameSettings.numRounds * maxScore)) * 100).toFixed(2) > 50 ? (
+                        <p className="text-green-500">{translations.goodAccuracy}</p>
+                    ) : (
+                        <p className="text-red-500">{translations.badAccuracy}</p>
+                    )}
+
                     <Button
                         onClick={restartGame}
                         className="bg-yellow-500 hover:bg-yellow-600"
                     >
-                        Restart Game
+                        {translations.buttons.restartGame}
                     </Button>
 
                     <Button
                         onClick={backToHome}
                         className="bg-red-500 hover:bg-red-600"
                     >
-                        Back to Home
+                        {translations.buttons.backToMenu}
                     </Button>
                 </div>
             )}
