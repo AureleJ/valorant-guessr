@@ -11,7 +11,7 @@ const Button = ({
                     type = "button",
                     ...props
                 }) => {
-    const baseStyles = "font-bold rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    const baseStyles = "font-bold rounded transition-all duration-200 ease-in-out border-none";
 
     const variantStyles = {
         primary: "bg-[var(--secondary-color)] hover:bg-[var(--hover-color)] text-white focus:ring-[var(--secondary-color)]",

@@ -26,6 +26,7 @@ export default function Game() {
         setImage,
         setImageCoords,
         setMapName,
+        restartGame,
         imageCoords,
         gameSettings,
         gameState,
@@ -109,8 +110,8 @@ export default function Game() {
         selectRandomImage();
     };
 
-    const restartGame = () => {
-        resetGame();
+    const restart = () => {
+        restartGame()
         setEndGame(false);
         selectRandomImage();
     }
@@ -167,7 +168,7 @@ export default function Game() {
 
                     <Button
                         onClick={() => validateGuess(guessPosition)}
-                        disabled={!haveGuessed}
+                        disabled={!haveGuessed || validGuess}
                     >
                         {translations.buttons.validateGuess}
                     </Button>
@@ -175,12 +176,11 @@ export default function Game() {
             </div>
 
             {validGuess && (
-                <div className="absolute z-20 flex items-center justify-center flex-col gap-4 bg-black bg-opacity-50 backdrop-blur-sm w-full h-full">
-                    <div className="text-center">
+                <div className="absolute z-20 flex items-center justify-center flex-col gap-4 bg-opacity-50 backdrop-blur-sm p-10 rounded-lg fade-in transition-all duration-300 ease-in-out bg-black">
+                    <div className="text-center flex flex-col gap-5">
                         <p className="text-[var(--primary-color)] text-xl font-bold">Score de la manche : {gameState.score}</p>
                         <p className="text-[var(--primary-color)] text-xl font-bold">Score total : {gameState.totalScore}</p>
-                        <p className="text-[var(--primary-color)]">{translations.rounds}: {gameState.round}/{gameSettings.numRounds}</p>
-                        <p className="text-[var(--secondary-color)]">
+                        <p className="text-[var(--secondary-color)] text-lg font-bold">
                             Distance: {currentDistance.toFixed(2)}m
                         </p>
                     </div>
@@ -206,7 +206,7 @@ export default function Game() {
                     )}
 
                     <Button
-                        onClick={restartGame}
+                        onClick={restart}
                         className="bg-yellow-500 hover:bg-yellow-600"
                     >
                         {translations.buttons.restartGame}

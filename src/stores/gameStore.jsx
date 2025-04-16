@@ -144,4 +144,41 @@ export const useGameStore = create((set, get) => ({
         imageCoords: null,
         guessPosition: {x: null, y: null},
     }),
+
+    startGame: (selectedMaps, difficulty, rounds) => set({
+        gameSettings: {
+            mapSelected: selectedMaps,
+            difficulty: difficulty,
+            numRounds: rounds,
+        },
+        gameState: {
+            score: 0,
+            round: 1,
+            totalScore: 0,
+        },
+        currentDistance: null,
+        validGuess: false,
+        haveGuessed: false,
+        drawPing: false,
+        images: [],
+        image: null,
+        imageCoords: null,
+        guessPosition: {x: null, y: null},
+    }),
+
+    restartGame : () => set({
+        gameState: {
+            score: 0,
+            round: 1,
+            totalScore: 0,
+        },
+        currentDistance: null,
+        validGuess: false,
+        haveGuessed: false,
+        drawPing: false,
+        usedImageIds: [],
+        image: null,
+        imageCoords: null,
+        guessPosition: {x: null, y: null},
+    }),
 }));

@@ -18,6 +18,21 @@ const RadioInput = ({id, name, label, value, defaultChecked, type}) => (<div cla
     </label>
 </div>);
 
+const SliderInput = ({id, name, value, min, max, onChange}) => (
+    <div className="flex items-center gap-x-3">
+        <input
+            id={id}
+            name={name}
+            type="range"
+            min={min}
+            max={max}
+            value={value}
+            onChange={onChange}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb border-none"
+        />
+    </div>
+);
+
 const CheckboxDifficulty = ({title}) => {
     const {availableDifficulties} = useGameStore();
     const {getCurrentTranslations} = useLanguageStore();
@@ -59,8 +74,38 @@ const CheckboxMaps = ({title}) => {
     </fieldset>);
 }
 
+const SliderRounds = ({title}) => {
+    const {maxRounds} = useGameStore();
+    const {getCurrentTranslations} = useLanguageStore();
+    const translations = getCurrentTranslations();
+
+    const [roundsValue, setRoundsValue] = React.useState(5);
+
+    const handleSliderChange = (e) => {
+        setRoundsValue(e.target.value);
+    };
+
+    return (
+        <fieldset className="mb-4">
+            <legend className="text-white text-lg font-medium mb-5">{title}</legend>
+            <div className="flexflex-col items-center">
+                <span className="text-white">{roundsValue}</span>
+                <SliderInput
+                    id="rounds"
+                    name="rounds"
+                    label={translations.rounds}
+                    value={roundsValue}
+                    min={2}
+                    max={maxRounds}
+                    onChange={handleSliderChange}
+                />
+            </div>
+        </fieldset>
+    );
+};
+
 export default function Menu() {
-    const {setGameSettings} = useGameStore();
+    const {startGame} = useGameStore();
     const {setLanguage, getCurrentTranslations} = useLanguageStore();
     const translations = getCurrentTranslations();
 
@@ -76,9 +121,7 @@ export default function Menu() {
         const selectedMaps = formData.getAll("maps");
         const difficulty = formData.get("difficulty");
 
-        setGameSettings({
-            mapSelected: selectedMaps, difficulty: difficulty, numRounds: 5,
-        });
+        startGame(selectedMaps, difficulty, formData.get("rounds"));
 
         navigate("/game");
     }
@@ -87,10 +130,10 @@ export default function Menu() {
         <div className="flex flex-col h-screen bg-[var(--background)] items-center justify-center relative">
 
             <form className="flex flex-col items-center justify-center flex-grow" onSubmit={handleSubmit}>
-                <h2 className="text-white text-2xl text-center pt-8 pb-6">{translations.optionsSelections}</h2>
                 <div className="p-10 flex flex-col gap-5">
                     <CheckboxDifficulty title={translations.difficulties}/>
                     <CheckboxMaps title={translations.maps}/>
+                    <SliderRounds title={translations.rounds}/>
                     <div className="flex justify-center">
                         <Button type="submit">{translations.buttons.startGame}</Button>
                     </div>
@@ -98,25 +141,26 @@ export default function Menu() {
             </form>
 
 
-            <div className="flex justify-center gap-4 mb-4 absolute bottom-0 left-0 p-4">
+            <div className="flex justify-center gap-4 absolute bottom-4 left-4">
                 <Button onClick={() => setLanguage("en-US")}>EN</Button>
                 <Button onClick={() => setLanguage("fr-FR")}>FR</Button>
             </div>
 
-            <p onClick={() => setDisplayCredits(true)}
-               className="text-white cursor-pointer text-center text-sm absolute bottom-0 right-0 p-4">Credits</p>
+            <Button variant="ghost" size="small" className="absolute bottom-4 right-4 p-4" onClick={() => setDisplayCredits(true)}>
+                Credits
+            </Button>
 
-            {displayCredits && <div onClick={() => setDisplayCredits(false)}
-                                    className="absolute w-full h-full flex items-center justify-center flex-col gap-4 bg-black bg-opacity-50 backdrop-blur-sm z-20">
+            {displayCredits && <div  className="absolute w-full h-full flex items-center justify-center flex-col gap-4 bg-black bg-opacity-50 backdrop-blur-sm z-20">
+                <div className="absolute top-4 right-4 cursor-pointer" onClick={() => setDisplayCredits(false)}>
+                    <Button size="small">X</Button>
+                </div>
+
                 <h2 className="text-[var(--primary-color)] text-xl font-bold">Credits</h2>
-                <p className="text-[var(--primary-color)]">Game developed by AureleJ <a href={"https://aurelej.dev"}
-                                                                                        target="_blank"
-                                                                                        rel="noopener noreferrer"
-                                                                                        className="text-[var(--primary-color)]">My
-                    website</a></p>
-                <p className="text-[var(--primary-color)]">Images from Valorant game</p>
-                <p className="text-[var(--primary-color)]">Special thanks to Yoan for the help to take screenshots of
-                    the maps</p>
+                <p className="text-[var(--primary-color)]">
+                    Game developed by <a href={"https://aurelej.dev"} target="_blank" rel="noopener noreferrer" className="text-[var(--secondary-color)]">AureleJ</a>
+                </p>
+                <p className="text-[var(--primary-color)]">Images from <a href={"https://playvalorant.com"} target="_blank" rel="noopener noreferrer" className="text-[var(--secondary-color)]">Valorant</a></p>
+                <p className="text-[var(--primary-color)]">Special thanks to <span  className="text-[var(--secondary-color)]">Yoan</span> for the help to take screenshots of the maps</p>
             </div>}
         </div>);
 }
