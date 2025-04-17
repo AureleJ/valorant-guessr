@@ -289,7 +289,7 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
                 </div>
                 <div
                     ref={imageRef}
-                    className="absolute select-none overflow-hidden aspect-square h-full"
+                    className="absolute select-none overflow-hidden aspect-square w-full"
                     style={{
                         transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
                         width: aspectRatio > 1 ? "auto" : "100%",
