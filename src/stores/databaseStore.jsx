@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseKey = import.meta.env.SUPABASE_KEY;
+const supabaseUrl = import.env.local.SUPABASE_URL;
+const supabaseKey = import.env.local.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const useDatabaseStore = create((set, get) => ({
