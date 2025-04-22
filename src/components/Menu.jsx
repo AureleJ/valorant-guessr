@@ -1,8 +1,9 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Button from "./Button.jsx";
 import {useGameStore} from '../stores/gameStore';
 import {useNavigate} from "react-router-dom";
 import {useLanguageStore} from "../stores/languageStore";
+import {useDatabaseStore} from "../stores/databaseStore.jsx";
 
 const RadioInput = ({id, name, label, value, defaultChecked, type}) => (<div className="flex items-center gap-x-3">
     <input
@@ -109,7 +110,13 @@ export default function Menu() {
     const {setLanguage, getCurrentTranslations} = useLanguageStore();
     const translations = getCurrentTranslations();
 
-    const [displayCredits, setDisplayCredits] = React.useState(false);
+    const {fetchLeaderboard, leaderboard} = useDatabaseStore();
+
+    useEffect(() => {
+        fetchLeaderboard();
+    }, [fetchLeaderboard]);
+
+    const [displayCredits, setDisplayCredits] = useState(false);
 
     const navigate = useNavigate();
 
@@ -129,19 +136,52 @@ export default function Menu() {
     return (
         <div className="flex flex-col h-screen bg-[var(--background)] items-center justify-center relative">
 
-            <form className="flex flex-col items-center justify-center flex-grow" onSubmit={handleSubmit}>
-                <div className="p-10 flex flex-col gap-5">
-                    <CheckboxDifficulty title={translations.difficulties}/>
-                    <CheckboxMaps title={translations.maps}/>
-                    <SliderRounds title={translations.rounds}/>
-                    <div className="flex justify-center">
-                        <Button type="submit">{translations.buttons.startGame}</Button>
+            <div className="relative flex flex-col items-center justify-center w-full">
+                <form className="flex flex-col items-center justify-center flex-grow relative w-full" onSubmit={handleSubmit}>
+                    <div className="p-10 flex flex-col gap-5 max-w-lg w-full bg-[var(--second-background)] rounded-lg shadow-lg">
+                        <CheckboxDifficulty title={translations.difficulties}/>
+                        <CheckboxMaps title={translations.maps}/>
+                        <SliderRounds title={translations.rounds}/>
+                        <div className="flex justify-center">
+                            <Button type="submit">{translations.buttons.startGame}</Button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
 
+                <h2 className="text-[var(--primary-color)] text-xl font-bold mt-10 mb-5">Leaderboard</h2>
+                <table className="w-full max-w-lg text-sm text-left text-[var(--primary-color)] rounded-lg overflow-hidden">
+                    <thead className="text-xs text-[var(--primary-color)] uppercase bg-[var(--second-background)]">
+                        <tr>
+                            <th scope="col" className="px-6 py-3">
+                                Rank
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Pseudo
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Score
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {leaderboard.map((entry, index) => (
+                            <tr key={index} className="bg-[var(--second-background)] transition-colors duration-300 hover:bg-[var(--background)]">
+                                <td className="px-6 py-3 whitespace-nowrap">
+                                    {index + 1}
+                                </td>
+                                <td className="px-6 py-4 font-medium text-[var(--primary-color)] whitespace-nowrap">
+                                    {entry.pseudo}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {entry.score}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
-            <div className="flex justify-center gap-4 absolute bottom-4 left-4">
+            <div className="flex justify-center gap-4 absolute top-4 left-4">
                 <Button onClick={() => setLanguage("en-US")}>EN</Button>
                 <Button onClick={() => setLanguage("fr-FR")}>FR</Button>
             </div>
@@ -162,5 +202,11 @@ export default function Menu() {
                 <p className="text-[var(--primary-color)]">Images from <a href={"https://playvalorant.com"} target="_blank" rel="noopener noreferrer" className="text-[var(--secondary-color)]">Valorant</a></p>
                 <p className="text-[var(--primary-color)]">Special thanks to <span  className="text-[var(--secondary-color)]">Yoan</span> for the help to take screenshots of the maps</p>
             </div>}
+
+
+            <div className="absolute bottom-4 left-4">
+                <p className="text-[var(--primary-color)] text-sm">Version 1.0.0</p>
+                <p className="text-[var(--primary-color)] text-sm">Made with ❤️ by AureleJ</p>
+            </div>
         </div>);
 }

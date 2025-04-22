@@ -1,6 +1,6 @@
 import Menu from "./components/Menu.jsx";
 import Game from "./components/Game.jsx";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 
 function App() {
 

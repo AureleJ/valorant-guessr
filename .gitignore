@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 public/maps/ascent/easy/uncompressed
+
+# Local env files
+.env

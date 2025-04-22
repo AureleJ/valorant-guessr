@@ -8,6 +8,7 @@ import InteractiveMap from "./InteractiveMap.jsx";
 import Button from "./Button.jsx";
 import {useNavigate} from "react-router-dom";
 import {useLanguageStore} from "../stores/languageStore.jsx";
+import {useDatabaseStore} from "../stores/databaseStore.jsx";
 
 export default function Game() {
     const [data, setData] = useState(null);
@@ -18,6 +19,8 @@ export default function Game() {
     const navigate = useNavigate();
 
     const translations = useLanguageStore(state => state.getCurrentTranslations());
+
+    const {addLeaderboardEntry} = useDatabaseStore();
 
     const {
         validateGuess,
@@ -205,13 +208,33 @@ export default function Game() {
                         <p className="text-red-500">{translations.badAccuracy}</p>
                     )}
 
+                    <p className="text-[var(--primary-color)] mt-7">Add your score to the leaderboard</p>
+                    <form className="flex flex-row items-center justify-center gap-4" onSubmit={async (e) => {
+                        e.preventDefault();
+                        const pseudo = e.target.elements.pseudo.value;
+                        if (!pseudo) return;
+
+                        await addLeaderboardEntry(pseudo, gameState.totalScore);
+                        backToHome();
+                    }}>
+                        <input
+                            type="text"
+                            name="pseudo"
+                            placeholder="Enter your pseudo"
+                            className="p-2 rounded-lg bg-[var(--second-background)] text-[var(--primary-color)]"
+                            required
+                        />
+                        <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
+                            Add
+                        </Button>
+                    </form>
+
                     <Button
                         onClick={restart}
-                        className="bg-yellow-500 hover:bg-yellow-600"
+                        className="bg-yellow-500 hover:bg-yellow-600 mt-7"
                     >
                         {translations.buttons.restartGame}
                     </Button>
-
                     <Button
                         onClick={backToHome}
                         className="bg-red-500 hover:bg-red-600"
