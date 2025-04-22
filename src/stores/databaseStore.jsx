@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_KEY;
+const supabaseUrl = process.env.VITE_APP_URL;
+const supabaseKey = process.env.VITE_APP_KEY;
 console.log(supabaseUrl, supabaseKey);
 
 const supabase = createClient(supabaseUrl, supabaseKey);
