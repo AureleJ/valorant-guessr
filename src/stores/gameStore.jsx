@@ -27,6 +27,7 @@ export const useGameStore = create((set, get) => ({
     image: null,
     imageCoords: null,
     currentDistance: null,
+    isChallenge: false,
 
     // UI flags
     validGuess: false,
@@ -145,7 +146,7 @@ export const useGameStore = create((set, get) => ({
         guessPosition: {x: null, y: null},
     }),
 
-    startGame: (selectedMaps, difficulty, rounds) => set({
+    startGame: (selectedMaps, difficulty, rounds, challenge) => set({
         gameSettings: {
             mapSelected: selectedMaps,
             difficulty: difficulty,
@@ -164,6 +165,7 @@ export const useGameStore = create((set, get) => ({
         image: null,
         imageCoords: null,
         guessPosition: {x: null, y: null},
+        isChallenge: challenge
     }),
 
     restartGame : () => set({

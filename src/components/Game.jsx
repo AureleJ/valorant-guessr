@@ -42,6 +42,7 @@ export default function Game() {
         image,
         currentDistance,
         resetGame,
+        isChallenge
     } = useGameStore();
 
     useEffect(() => {
@@ -179,10 +180,13 @@ export default function Game() {
             </div>
 
             {validGuess && (
-                <div className="absolute z-20 flex items-center justify-center flex-col gap-4 bg-opacity-50 backdrop-blur-sm p-10 rounded-lg fade-in transition-all duration-300 ease-in-out bg-black">
+                <div
+                    className="absolute z-20 flex items-center justify-center flex-col gap-4 bg-opacity-50 backdrop-blur-sm p-10 rounded-lg fade-in transition-all duration-300 ease-in-out bg-black">
                     <div className="text-center flex flex-col gap-5">
-                        <p className="text-[var(--primary-color)] text-xl font-bold">Score de la manche : {gameState.score}</p>
-                        <p className="text-[var(--primary-color)] text-xl font-bold">Score total : {gameState.totalScore}</p>
+                        <p className="text-[var(--primary-color)] text-xl font-bold">Score de la manche
+                            : {gameState.score}</p>
+                        <p className="text-[var(--primary-color)] text-xl font-bold">Score total
+                            : {gameState.totalScore}</p>
                         <p className="text-[var(--secondary-color)] text-lg font-bold">
                             Distance: {currentDistance.toFixed(2)}m
                         </p>
@@ -208,26 +212,30 @@ export default function Game() {
                         <p className="text-red-500">{translations.badAccuracy}</p>
                     )}
 
-                    <p className="text-[var(--primary-color)] mt-7">Add your score to the leaderboard</p>
-                    <form className="flex flex-row items-center justify-center gap-4" onSubmit={async (e) => {
-                        e.preventDefault();
-                        const pseudo = e.target.elements.pseudo.value;
-                        if (!pseudo) return;
+                    {isChallenge && (
+                        <>
+                            <p className="text-[var(--primary-color)] mt-7">Add your score to the leaderboard</p>
+                            <form className=" flex flex-row items-center justify-center gap-4"
+                                  onSubmit={async (e) => {
+                                      e.preventDefault();
+                                      const pseudo = e.target.elements.pseudo.value;
+                                      if (!pseudo) return;
 
-                        await addLeaderboardEntry(pseudo, gameState.totalScore);
-                        backToHome();
-                    }}>
-                        <input
-                            type="text"
-                            name="pseudo"
-                            placeholder="Enter your pseudo"
-                            className="p-2 rounded-lg bg-[var(--second-background)] text-[var(--primary-color)]"
-                            required
-                        />
-                        <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
-                            Add
-                        </Button>
-                    </form>
+                                      await addLeaderboardEntry(pseudo, gameState.totalScore);
+                                      backToHome();
+                                  }}>
+                                <input
+                                    type="text"
+                                    name="pseudo"
+                                    placeholder="Enter your pseudo"
+                                    className="p-2 rounded-lg bg-[var(--second-background)] text-[var(--primary-color)]"
+                                    required
+                                />
+                                <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
+                                    Add
+                                </Button>
+                            </form>
+                        </>)}
 
                     <Button
                         onClick={restart}
@@ -242,7 +250,9 @@ export default function Game() {
                         {translations.buttons.backToMenu}
                     </Button>
                 </div>
-            )}
+            )
+            }
         </div>
-    );
+    )
+
 }
