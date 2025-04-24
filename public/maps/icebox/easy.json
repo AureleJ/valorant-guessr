@@ -1,0 +1,14 @@
+{
+  "difficulty": "easy",
+  "callouts": [
+    {
+      "regionName": "Boat House",
+      "superRegionName": "B",
+      "imageName": "Boat_House_B.webp",
+      "location": {
+        "x": 0.23,
+        "y": 0.87
+      }
+    }
+  ]
+}

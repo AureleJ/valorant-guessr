@@ -1,0 +1,13 @@
+{
+  "id": "abyss",
+  "name": "Abyss",
+  "filePath": "maps/abyss/",
+  "imageName": "abyss.png",
+
+  "mods": {
+    "easy": "easy.json",
+    "medium": "medium.json",
+    "hard": "hard.json",
+    "spells": "spells.json"
+  }
+}
