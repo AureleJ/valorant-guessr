@@ -2,9 +2,9 @@
   "difficulty": "easy",
   "callouts": [
     {
-      "regionName": "Boat House",
-      "superRegionName": "B",
-      "imageName": "Boat_House_B.webp",
+      "regionName": "Conduit",
+      "superRegionName": "A",
+      "imageName": "A_Conduit.png",
       "location": {
         "x": 0.23,
         "y": 0.87

@@ -14,12 +14,12 @@ const Button = ({
     const baseStyles = "font-bold rounded transition-all duration-200 ease-in-out border-none";
 
     const variantStyles = {
-        primary: "bg-[var(--secondary-color)] hover:bg-[var(--hover-color)] text-white focus:ring-[var(--secondary-color)]",
+        primary: "bg-secondary hover:bg-secondary-hover text-white focus:ring-secondary-hover",
         secondary: "bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500",
         success: "bg-green-500 hover:bg-green-600 text-white focus:ring-green-500",
         danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500",
-        outline: "bg-transparent border-2 border-[var(--secondary-color)] text-[var(--secondary-color)] hover:bg-[var(--secondary-color)] hover:text-white focus:ring-[var(--secondary-color)]",
-        ghost: "bg-transparent text-[var(--secondary-color)] hover:bg-[var(--secondary-color)/10] focus:ring-[var(--secondary-color)]"
+        outline: "bg-transparent border-2 border-secondary-hover text-secondary-hover hover:bg-secondary-hover hover:text-white focus:ring-secondary-hover",
+        ghost: "bg-transparent text-secondary-hover hover:bg-secondary focus:ring-secondary-hover"
     };
 
     // Responsive size styles
