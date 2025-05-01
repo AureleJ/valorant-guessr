@@ -1,11 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faGear, faTimes, faTrophy} from '@fortawesome/free-solid-svg-icons';
 
 import Button from "./Button.jsx";
-import Params from "./Params.jsx";
 import {useGameStore} from '../stores/gameStore';
 import {useLanguageStore} from "../stores/languageStore";
 import {useDatabaseStore} from "../stores/databaseStore.jsx";
@@ -234,8 +232,7 @@ const NavBar = ({dayChallenge, setDayChallenge}) => {
     };
 
     return (
-        <nav
-            className="relative flex flex-row items-center justify-center mb-3 w-full max-w-lg">
+        <nav className="relative flex flex-row items-center justify-center mb-3 w-full max-w-lg">
             <div
                 id="indicator"
                 className="absolute left-0 bottom-2 h-1 bg-secondary transition-all duration-300 ease-in-out rounded-full"
