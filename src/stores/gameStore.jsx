@@ -8,7 +8,7 @@ export const useGameStore = create((set, get) => ({
         mapSelected: ["Ascent"],
     },
 
-    availableMaps: ["Ascent"],
+    availableMaps: ["Ascent", "Abyss", "Fracture"],
     availableDifficulties: ["Easy", "Spells"],
     maxRoundsChoice: 5,
     maxRounds: 10,
