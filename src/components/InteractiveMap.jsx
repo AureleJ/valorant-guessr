@@ -270,7 +270,9 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
         <div className="relative w-full h-full">
             <div
                 ref={containerRef}
-                className={`bg-[--second-background] rounded-lg overflow-hidden aspect-square cursor-crosshair flex justify-center items-center
+                className={`
+                bg-gray-700 p-7 rounded-lg shadow-lg border-2 border-gray-700 backdrop-blur-lg bg-opacity-50
+                 overflow-hidden aspect-square cursor-crosshair flex justify-center items-center
                 ${
                     fullscreen ? "fixed top-0 left-0 transform h-screen w-screen z-10 bg-black backdrop-blur-sm bg-opacity-80" : "relative w-full"
                 }`}

@@ -135,27 +135,25 @@ export default function Game() {
     if (!imageCoords) return <Error>Image coordinates are not available</Error>;
 
     return (
-        <div className="flex h-screen w-screen items-center justify-center flex-col">
-            <Button className={"absolute top-4 right-4"} onClick={backToHome}>
-                {translations.buttons.backToMenu}
-            </Button>
-
-            <div className="absolute top-0 left-0 p-4">
-                {/*<p className="text-[var(--primary-color)]">{translations.map}: {gameSettings.mapName}</p>*/}
-                {/*<p className="text-[var(--primary-color)]">{translations.difficulty}: {translations.difficultyOptions[gameSettings.difficulty.toLowerCase()]}</p>*/}
-                {/*<p className="text-[var(--primary-color)]">{translations.rounds}: {gameSettings.numRounds}</p>*/}
-                <p className="text-[var(--primary-color)] text-xl font-bold">{translations.round}: {gameState.round}/{gameSettings.numRounds}</p>
+        <div
+            className="flex flex-col w-full h-full bg-gray-800 items-center justify-start relative p-10 text-primary">
+            <div className="relative flex items-center justify-between w-full mb-5">
+                <p className="text-xl font-bold">{translations.round}: {gameState.round}/{gameSettings.numRounds}</p>
+                <Button onClick={backToHome}>
+                    {translations.buttons.backToMenu}
+                </Button>
             </div>
 
-            <div className="relative flex w-[90%] items-center justify-center gap-4 md:flex-row flex-col">
+            <div className="relative flex w-full h-full items-center justify-center gap-4 md:flex-row flex-col ">
                 <div className="relative flex items-center justify-center w-full rounded-lg overflow-hidden">
                     <img
                         src={image}
                         alt="Game view"
-                        className={"object-cover select-none"}
+                        className="object-cover select-none "
                         draggable={false}
                         onLoad={handleImageLoad}
                     />
+
                     {isImageLoading && (
                         <div
                             className="absolute flex items-center justify-center w-full h-full rounded-lg bg-gradient-to-br from-red to-gray-700">
@@ -164,7 +162,7 @@ export default function Game() {
                     )}
                 </div>
 
-                <div className="relative flex flex-col items-center justify-center gap-4 w-1/2 min-w-[300px]">
+                <div className="relative flex flex-col items-center justify-center w-1/2 gap-4">
                     <InteractiveMap
                         imagePath={data.filePath + data.imageName}
                         imgCoords={imageCoords}

@@ -8,6 +8,7 @@ import Button from "./Button.jsx";
 import {useGameStore} from '../stores/gameStore';
 import {useLanguageStore} from "../stores/languageStore";
 import {useDatabaseStore} from "../stores/databaseStore.jsx";
+import Params from "./Params.jsx";
 
 library.add(faGear, faTimes, faTrophy);
 
@@ -17,7 +18,7 @@ const RadioInput = ({id, name, label, value, checked, type, onChange}) => (
             htmlFor={id}
             className={`flex items-center justify-center px-3 py-2 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                 checked
-                    ? 'bg-secondary border-secondary text-white shadow-md'
+                    ? 'bg-secondary border-secondary text-white shadow-secondary/50 shadow-lg'
                     : 'bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600'
             }`}
         >
@@ -34,7 +35,9 @@ const RadioInput = ({id, name, label, value, checked, type, onChange}) => (
                 }}
                 className="absolute opacity-0 w-0 h-0"
             />
-            <span className="text-sm font-medium">{label}</span>
+            <span
+                className="text-sm font-medium text-center select-none"
+            >{label}</span>
         </label>
     </div>
 );
@@ -74,24 +77,28 @@ const DifficultySelector = ({title, availableDifficulties, initialDifficulty, on
     );
 };
 
-const MapSelector = ({title, availableMaps, initialMap, onMapChange}) => {
-    const [selected, setSelected] = useState(initialMap || availableMaps[0]);
+const MapSelector = ({title, availableMaps, initialMaps, onMapChange}) => {
+    const [selectedMaps, setSelectedMaps] = useState(initialMaps || []);
 
     useEffect(() => {
-        if (initialMap) {
-            setSelected(initialMap);
+        if (initialMaps) {
+            setSelectedMaps(initialMaps);
         }
-    }, [initialMap]);
+    }, [initialMaps]);
 
     const handleSelection = (map) => {
-        setSelected(map);
-        onMapChange(map);
+        const updatedSelection = selectedMaps.includes(map)
+            ? selectedMaps.filter((selected) => selected !== map)
+            : [...selectedMaps, map];
+
+        setSelectedMaps(updatedSelection);
+        onMapChange(updatedSelection);
     };
 
     return (
         <fieldset className="w-full">
             <legend className="text-white text-lg font-semibold mb-3">{title}</legend>
-            <div className="flex flex-row gap-3">
+            <div className="flex flex-row gap-3 flex-wrap">
                 {availableMaps.map((map, index) => (
                     <RadioInput
                         key={index}
@@ -99,8 +106,8 @@ const MapSelector = ({title, availableMaps, initialMap, onMapChange}) => {
                         name="maps"
                         label={map}
                         value={map}
-                        type="radio"
-                        checked={map === selected}
+                        type="checkbox"
+                        checked={selectedMaps.includes(map)}
                         onChange={() => handleSelection(map)}
                     />
                 ))}
@@ -113,10 +120,7 @@ const SliderInput = ({id, name, value, min, max, onChange}) => (
     <>
         <div className="flex flex-col items-center w-full relative">
             <div className="relative w-full">
-                <span
-                    className="text-white text-lg font-semibold relative"
-                >
-                    {value}</span>
+                <span className="text-white text-lg font-semibold relative select-none">{value}</span>
             </div>
 
             <input
@@ -132,57 +136,6 @@ const SliderInput = ({id, name, value, min, max, onChange}) => (
         </div>
     </>
 );
-
-/*const CheckboxDifficulty = ({title}) => {
-    const {availableDifficulties} = useGameStore();
-    const {getCurrentTranslations} = useLanguageStore();
-    const translations = getCurrentTranslations();
-    const difficultyOptions = translations.difficultyOptions;
-
-    return (
-        <fieldset className="mb-6">
-            <legend
-                className="text-white text-lg font-bold mb-4 border-b border-[var(--secondary-color)] pb-2">{title}</legend>
-            <div className="flex gap-x-10 justify-center">
-                {availableDifficulties.map((difficulty, index) => (
-                    <RadioInput
-                        key={index}
-                        id={`difficulty-${index}`}
-                        name="difficulty"
-                        label={difficultyOptions[difficulty.toLowerCase()]}
-                        value={difficulty}
-                        type="radio"
-                        defaultChecked={index === 0}
-                    />
-                ))}
-            </div>
-        </fieldset>
-    );
-};*/
-
-/*const CheckboxMaps = ({title}) => {
-    const {availableMaps} = useGameStore();
-
-    return (
-        <fieldset className="mb-6">
-            <legend
-                className="text-white text-lg font-bold mb-4 border-b border-[var(--secondary-color)] pb-2">{title}</legend>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {availableMaps.map((map, index) => (
-                    <RadioInput
-                        key={index}
-                        id={`map-${index}`}
-                        name="maps"
-                        label={map}
-                        value={map}
-                        type="checkbox"
-                        defaultChecked
-                    />
-                ))}
-            </div>
-        </fieldset>
-    );
-};*/
 
 const SliderRounds = ({title}) => {
     const {maxRounds} = useGameStore();
@@ -236,19 +189,19 @@ const NavBar = ({dayChallenge, setDayChallenge}) => {
         <nav className="relative flex flex-row items-center justify-center mb-3 w-full max-w-lg">
             <div
                 id="indicator"
-                className="absolute left-0 bottom-2 h-1 bg-secondary transition-all duration-300 ease-in-out rounded-full"
+                className="absolute left-0 bottom-2 h-1 transition-all duration-300 ease-in-out rounded-full bg-primary"
             />
             <button
                 id="day-challenge-button"
                 onClick={() => handleTabChange(true, "day-challenge-button")}
-                className={`relative text-center font-bold transition-colors duration-200 py-4 px-6 w-1/3 ${dayChallenge ? 'text-secondary ' : 'text-white'}`}
+                className={`relative text-center font-bold transition-colors duration-200 p-4 w-1/3 ${dayChallenge ? 'text-primary' : 'text-gray-400'}`}
             >
                 Day Challenge
             </button>
             <button
                 id="custom-game-button"
                 onClick={() => handleTabChange(false, "custom-game-button")}
-                className={`relative text-center font-bold transition-colors duration-200 py-4 px-6 w-1/3 ${!dayChallenge ? 'text-secondary ' : 'text-white'}`}
+                className={`relative text-center font-bold transition-colors duration-200 p-4 w-1/3 ${!dayChallenge ? 'text-primary' : 'text-gray-400'}`}
             >
                 Custom Game
             </button>
@@ -361,6 +314,18 @@ const Menu = () => {
         const difficulty = formData.get("difficulty");
         const rounds = formData.get("rounds");
 
+        const notAvailableMaps = ["Abyss", "Fracture", "Split", "Haven", "Icebox", "Pearl", "Lotus", "Bind", "Breeze", "Breach"];
+        if (selectedMaps.some(map => notAvailableMaps.includes(map))) {
+            window.alert("Some maps are not available yet. Please check back later.");
+            return;
+        }
+
+        const notAvailableDifficulties = ["Hard", "Medium"];
+        if (notAvailableDifficulties.includes(difficulty)) {
+            window.alert("Some difficulties are not available yet. Please check back later.");
+            return;
+        }
+
         startGame(selectedMaps, difficulty, rounds, false);
         navigate("/game");
     };
@@ -377,8 +342,7 @@ const Menu = () => {
 
     return (
         <div
-            className="flex flex-col w-screen h-full min-h-screen bg-gray-800 items-center justify-center relative p-20 px-10 text-primary">
-            {/* Background stylistic elements */}
+            className="flex flex-col w-screen h-full min-h-screen bg-gray-800 items-center justify-start relative p-20 px-10 text-primary">
             <div className="absolute top-0 left-0 h-full w-full  inset-0 overflow-hidden">
                 <div
                     className="absolute -top-1/4 -left-20 h-1/2 aspect-square bg-gray-700 opacity-60 rounded-full blur-3xl"></div>
@@ -393,11 +357,12 @@ const Menu = () => {
             <div className="flex flex-col items-center justify-center w-full h-full z-10">
                 <NavBar dayChallenge={dayChallenge} setDayChallenge={setDayChallenge}/>
 
-                <div className="bg-gray-700 p-7 rounded-lg shadow-lg border-2 border-gray-700 backdrop-blur-lg bg-opacity-50">
+                <div
+                    className="bg-gray-700 p-7 rounded-lg shadow-lg border-2 border-gray-700 backdrop-blur-lg bg-opacity-50">
                     <div className="flex flex-col md:flex-row gap-10 items-center justify-center">
                         {!dayChallenge ? (
                             <form
-                                className="flex flex-col w-full items-center justify-center gap-10"
+                                className="flex flex-col w-full items-center justify-center gap-10  max-w-2xl"
                                 onSubmit={handleSubmit}
                             >
                                 <MapSelector

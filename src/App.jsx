@@ -4,14 +4,13 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 
 function App() {
 
-    return (<section>
-            <Router>
-                <Routes>
-                    <Route path="/" element={<Menu/>}/>
-                    <Route path="/game" element={<Game/>}/>
-                </Routes>
-            </Router>
-        </section>
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Menu/>}/>
+                <Route path="/game" element={<Game/>}/>
+            </Routes>
+        </Router>
     );
 }
 
