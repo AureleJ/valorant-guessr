@@ -1,11 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faGear} from '@fortawesome/free-solid-svg-icons';
 
 import Button from "./Button.jsx";
-import Params from "./Params.jsx";
 import {useGameStore} from '../stores/gameStore';
 import {useLanguageStore} from "../stores/languageStore";
 import {useDatabaseStore} from "../stores/databaseStore.jsx";
@@ -139,7 +137,7 @@ const NavBar = ({setDayChallenge}) => {
     };
 
     return (
-        <nav className="relative flex flex-row gap-5 items-center justify-center">
+        <nav className="relative flex flex-row gap-5 items-center justify-center mt-10 w-full">
             <div
                 id="indicator"
                 className="absolute left-0 bottom-0 w-1/3 bg-white rounded transition-all duration-200 h-1 transform"
@@ -301,54 +299,67 @@ const Menu = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[var(--background)] items-center justify-center relative">
-            <NavBar dayChallenge={dayChallenge} setDayChallenge={setDayChallenge}/>
+        <div>
+            <div
+                className="relative flex flex-col gap-16 items-start justify-between w-full max-h-screen h-screen">
+                <NavBar dayChallenge={dayChallenge} setDayChallenge={setDayChallenge}/>
 
-            <div className="relative flex flex-row items-center justify-center w-full h-4/5">
-                <Inner
-                    dayChallenge={dayChallenge}
-                    handleSubmit={handleSubmit}
-                    translations={translations}
-                    leaderboard={leaderboard}
-                />
+                <div className="relative flex flex-row items-center w-full">
+                    <Inner
+                        dayChallenge={dayChallenge}
+                        handleSubmit={handleSubmit}
+                        translations={translations}
+                        leaderboard={leaderboard}
+                    />
+                </div>
+
+                <div className="relative flex items-end justify-between w-full">
+                    <div>
+                        <p>Alpha version</p>
+                        <p>Made with ❤️ by AureleJ</p>
+                    </div>
+
+                    <div>
+                        <Button
+                            variant="ghost"
+                            size="small"
+                            className="p-4"
+                            onClick={() => setDisplayCredits(true)}
+                        >
+                            Credits
+                        </Button>
+                    </div>
+                </div>
             </div>
 
-            <Button
-                variant="ghost"
-                size="small"
-                className="absolute bottom-4 right-4 p-4"
-                onClick={() => setDisplayCredits(true)}
-            >
-                Credits
-            </Button>
 
-            <Button
-                size="square"
-                className="absolute top-4 left-4"
-                onClick={() => setActiveParams(!activeParams)}
-            >
-                <FontAwesomeIcon icon="fa-solid fa-gear"/>
-            </Button>
+            {/*<div className="absolute w-screen h-screen top-0 left-0">*/}
 
-            {activeParams && (
-                <>
-                    <Button
-                        size="square"
-                        className="absolute top-4 right-4 z-30"
-                        onClick={() => setActiveParams(false)}
-                    >
-                        X
-                    </Button>
-                    <Params/>
-                </>
-            )}
 
-            {displayCredits && <Credits setDisplayCredits={setDisplayCredits}/>}
+            {/*<Button*/}
+            {/*    size="square"*/}
+            {/*    className="absolute top-4 left-4"*/}
+            {/*    onClick={() => setActiveParams(!activeParams)}*/}
+            {/*>*/}
+            {/*    <FontAwesomeIcon icon="fa-solid fa-gear"/>*/}
+            {/*</Button>*/}
 
-            <div className="absolute bottom-4 left-4 text-[var(--primary-color)] text-sm">
-                <p>Alpha version</p>
-                <p>Made with ❤️ by AureleJ</p>
-            </div>
+            {/*{activeParams && (*/}
+            {/*    <>*/}
+            {/*        <Button*/}
+            {/*            size="square"*/}
+            {/*            className="absolute top-4 right-4 z-30"*/}
+            {/*            onClick={() => setActiveParams(false)}*/}
+            {/*        >*/}
+            {/*            X*/}
+            {/*        </Button>*/}
+            {/*        <Params/>*/}
+            {/*    </>*/}
+            {/*)}*/}
+
+            {/*{displayCredits && <Credits setDisplayCredits={setDisplayCredits}/>}*/}
+            {/*</div>*/}
+
         </div>
     );
 };
