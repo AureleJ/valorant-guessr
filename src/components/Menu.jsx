@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faGear, faTimes, faTrophy} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 import Button from "./Button.jsx";
 import {useGameStore} from '../stores/gameStore';
