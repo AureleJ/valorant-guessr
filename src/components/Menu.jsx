@@ -8,7 +8,6 @@ import Button from "./Button.jsx";
 import {useGameStore} from '../stores/gameStore';
 import {useLanguageStore} from "../stores/languageStore";
 import {useDatabaseStore} from "../stores/databaseStore.jsx";
-import Params from "./Params.jsx";
 
 library.add(faGear, faTimes, faTrophy);
 
@@ -186,7 +185,7 @@ const NavBar = ({dayChallenge, setDayChallenge}) => {
     };
 
     return (
-        <nav className="relative flex flex-row items-center justify-center mb-3 w-full max-w-lg">
+        <nav className="relative flex flex-row items-center justify-center w-full max-w-lg mb-4">
             <div
                 id="indicator"
                 className="absolute left-0 bottom-2 h-1 transition-all duration-300 ease-in-out rounded-full bg-primary"
@@ -213,11 +212,11 @@ const Leaderboard = ({leaderboard}) => {
     const placeholderCount = Math.max(0, 5 - leaderboard.length);
 
     return (
-        <div className="flex flex-col items-center justify-center max-w-2xl w-full">
+        <div className="flex flex-col items-center justify-center">
             <div className="w-full shadow-lg rounded-lg overflow-hidden">
                 <table className="w-full text-sm text-left">
                     <thead
-                        className="text-xs uppercase bg-secondary-background sticky top-0">
+                        className="text-xs uppercase sticky top-0 bg-gray-800">
                     <tr>
                         <th scope="col" className="px-6 py-3 text-center">#</th>
                         <th scope="col" className="px-6 py-3">Top Player</th>
@@ -227,7 +226,7 @@ const Leaderboard = ({leaderboard}) => {
                     <tbody>
                     {leaderboard.map((entry, index) => (
                         <tr key={index}
-                            className={`bg-secondary-background transition-colors duration-300 ${index % 2 === 0 ? 'bg-opacity-70' : ''}`}>
+                            className={`bg-gray-800 transition-colors duration-300 ${index % 2 === 0 ? 'bg-opacity-70' : ''}`}>
                             <td className="px-4 py-3 font-bold text-center">{index + 1}</td>
                             <td className="px-6 py-3 font-medium whitespace-nowrap">{entry.pseudo}</td>
                             <td className="px-6 py-3 text-center font-bold">{entry.score}</td>
@@ -236,7 +235,7 @@ const Leaderboard = ({leaderboard}) => {
 
                     {Array.from({length: placeholderCount}).map((_, index) => (
                         <tr key={`placeholder-${index}`}
-                            className={`bg-secondary-background transition-colors duration-300 ${index % 2 === 0 ? 'bg-opacity-70' : ''}`}>
+                            className={`bg-gray-800 transition-colors duration-300 ${index % 2 === 0 ? 'bg-opacity-70' : ''}`}>
                             <td className="px-6 py-3 text-center text-gray-500">{leaderboard.length + index + 1}</td>
                             <td className="px-6 py-3 font-medium text-gray-500">-</td>
                             <td className="px-6 py-3 text-gray-500 text-center">-</td>
@@ -250,41 +249,69 @@ const Leaderboard = ({leaderboard}) => {
 };
 
 const Credits = ({setDisplayCredits}) => (
-    <div
-        className="fixed inset-0 flex items-center justify-center flex-col gap-6 bg-black bg-opacity-70 backdrop-blur-sm z-50 p-4">
-        <div
-            className="bg-[var(--second-background)] p-8 rounded-lg max-w-md w-full relative border border-[var(--secondary-color)] shadow-lg">
-            <Button
-                size="square"
-                className="absolute top-4 right-4"
-                onClick={() => setDisplayCredits(false)}
-            >
+    <div className="fixed bg-gray-700 backdrop-blur-lg bg-opacity-50 w-full h-full inset-0 flex items-center flex-col justify-center z-50">
+        <div className="absolute top-10 right-10">
+            <Button size="square" onClick={() => setDisplayCredits(false)}>
                 <FontAwesomeIcon icon="fa-times"/>
             </Button>
+        </div>
 
-            <h2 className="text-[var(--secondary-color)] text-2xl font-bold mb-6 text-center">Credits</h2>
+        <div className="space-y-4">
+            <h2 className="text-2xl font-bold mb-6 text-center">Credits</h2>
+            <div>
+                <h3 className="text-lg font-medium mb-1">Development</h3>
+                <a href="https://aurelej.dev" target="_blank" rel="noopener noreferrer"
+                   className="hover:underline">AureleJ</a>
+            </div>
 
-            <div className="space-y-4 text-center">
-                <div>
-                    <h3 className="text-[var(--primary-color)] text-lg font-medium mb-1">Development</h3>
-                    <a href="https://aurelej.dev" target="_blank" rel="noopener noreferrer"
-                       className="text-[var(--secondary-color)] hover:underline">AureleJ</a>
+            <div>
+                <h3 className="text-lg font-medium mb-1">Assets</h3>
+                <a href="https://playvalorant.com" target="_blank" rel="noopener noreferrer"
+                   className="hover:underline">Valorant</a>
+            </div>
+
+            <div>
+                <h3 className="text-lg font-medium mb-1">Special Thanks</h3>
+                <p className="text-[var(--secondary-color)]">Yoan for map screenshots assistance</p>
+            </div>
+        </div>
+    </div>
+);
+
+const Params = ({setDisplayParams, setLanguage, getLanguage}) => (
+    <div className="fixed bg-gray-700 backdrop-blur-lg bg-opacity-50 w-full h-full inset-0 flex items-center flex-col justify-center z-50">
+        <div className="absolute top-10 right-10">
+            <Button size="square" onClick={() => setDisplayParams(false)}>
+                <FontAwesomeIcon icon="fa-times"/>
+            </Button>
+        </div>
+
+        <div className="space-y-4">
+            <h2 className="text-2xl font-bold mb-6 text-center">Settings</h2>
+            <div>
+                <h3 className="text-lg font-medium mb-1">Language</h3>
+                <div className="flex justify-center gap-4">
+                    <Button
+                        onClick={() => setLanguage("en-US")}
+                        variant={getLanguage === "en-US" ? "primary" : "secondary"}
+                    >EN</Button>
+                    <Button
+                        onClick={() => setLanguage("fr-FR")}
+                        variant={getLanguage === "fr-FR" ? "primary" : "secondary"}
+                    >FR</Button>
                 </div>
-
-                <div>
-                    <h3 className="text-[var(--primary-color)] text-lg font-medium mb-1">Assets</h3>
-                    <a href="https://playvalorant.com" target="_blank" rel="noopener noreferrer"
-                       className="text-[var(--secondary-color)] hover:underline">Valorant</a>
-                </div>
-
-                <div>
-                    <h3 className="text-[var(--primary-color)] text-lg font-medium mb-1">Special Thanks</h3>
-                    <p className="text-[var(--secondary-color)]">Yoan for map screenshots assistance</p>
+            </div>
+            <div>
+                <h3 className="text-lg font-medium mb-1">Theme</h3>
+                <div className="flex justify-center gap-4">
+                    <Button onClick={() => console.log("Light mode")}>Light</Button>
+                    <Button onClick={() => console.log("Dark mode")}>Dark</Button>
                 </div>
             </div>
         </div>
     </div>
 );
+
 
 const Menu = () => {
     const {
@@ -293,13 +320,15 @@ const Menu = () => {
         availableMaps,
     } = useGameStore();
 
+    const {setLanguage, getLanguage} = useLanguageStore();
+
     const {getCurrentTranslations} = useLanguageStore();
     const {fetchLeaderboard, leaderboard} = useDatabaseStore();
     const translations = getCurrentTranslations();
     const navigate = useNavigate();
 
     const [dayChallenge, setDayChallenge] = useState(true);
-    const [activeParams, setActiveParams] = useState(false);
+    const [displayParams, setDisplayParams] = useState(false);
     const [displayCredits, setDisplayCredits] = useState(false);
 
     useEffect(() => {
@@ -317,6 +346,10 @@ const Menu = () => {
         const notAvailableMaps = ["Abyss", "Fracture", "Split", "Haven", "Icebox", "Pearl", "Lotus", "Bind", "Breeze", "Breach"];
         if (selectedMaps.some(map => notAvailableMaps.includes(map))) {
             window.alert("Some maps are not available yet. Please check back later.");
+            return;
+        }
+        if (selectedMaps.length === 0) {
+            window.alert("Please select at least one map.");
             return;
         }
 
@@ -342,123 +375,106 @@ const Menu = () => {
 
     return (
         <div
-            className="flex flex-col w-screen h-full min-h-screen bg-gray-800 items-center justify-start relative p-20 px-10 text-primary">
-            <div className="absolute top-0 left-0 h-full w-full  inset-0 overflow-hidden">
-                <div
-                    className="absolute -top-1/4 -left-20 h-1/2 aspect-square bg-gray-700 opacity-60 rounded-full blur-3xl"></div>
-                <div
-                    className="absolute -bottom-1/4 -right-20 h-1/2 aspect-square bg-gray-700 opacity-60 rounded-full blur-3xl"></div>
+            className="flex flex-col w-screen h-full min-h-screen bg-gray-800 items-center justify-between relative p-6 gap-6 text-primary">
+            <div className="absolute top-0 left-0 h-full w-full inset-0 overflow-hidden z-0">
+                <div className="absolute -top-1/4 -left-20 h-1/2 aspect-square bg-gray-700 opacity-60 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-1/4 -right-20 h-1/2 aspect-square bg-gray-700 opacity-60 rounded-full blur-3xl"></div>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold text-center mb-11 z-10">
-                Valorant Guessr
-            </h1>
+            <div className="w-full flex justify-between z-10">
+                <Button
+                    size="square"
+                    onClick={() => setDisplayParams(!displayParams)}
+                >
+                    <FontAwesomeIcon icon="fa-solid fa-gear"/>
+                </Button>
+            </div>
 
-            <div className="flex flex-col items-center justify-center w-full h-full z-10">
+            <div className="w-full flex flex-col items-center justify-center z-10">
+                <h1 className="text-3xl md:text-4xl font-bold text-center">
+                    <span className="text-secondary">Valorant</span> Guessr
+                </h1>
+            </div>
+
+            <div className="w-full flex justify-center z-10">
                 <NavBar dayChallenge={dayChallenge} setDayChallenge={setDayChallenge}/>
+            </div>
 
+            <div className={"w-full flex justify-center z-10"}>
                 <div
-                    className="bg-gray-700 p-7 rounded-lg shadow-lg border-2 border-gray-700 backdrop-blur-lg bg-opacity-50">
-                    <div className="flex flex-col md:flex-row gap-10 items-center justify-center">
-                        {!dayChallenge ? (
-                            <form
-                                className="flex flex-col w-full items-center justify-center gap-10  max-w-2xl"
-                                onSubmit={handleSubmit}
+                    className="bg-gray-700 p-5 md:p-7 rounded-lg shadow-lg border border-gray-600 backdrop-blur-lg bg-opacity-50">
+                    {!dayChallenge ? (
+                        <form
+                            className="flex flex-col w-full items-center justify-center gap-8 max-w-2xl mx-auto"
+                            onSubmit={handleSubmit}
+                        >
+                            <MapSelector
+                                title={translations.maps}
+                                availableMaps={availableMaps}
+                                initialMap="Ascent"
+                                onMapChange={(map) => console.log("Selected map:", map)}
+                            />
+
+                            <DifficultySelector
+                                title={translations.difficulties}
+                                availableDifficulties={availableDifficulties}
+                                initialDifficulty="Easy"
+                                onDifficultyChange={(difficulty) => console.log("Selected difficulty:", difficulty)}
+                            />
+
+                            <SliderRounds title={translations.rounds}/>
+
+                            <Button
+                                type="submit"
+                                variant="primary"
                             >
-                                <MapSelector
-                                    title={translations.maps}
-                                    availableMaps={availableMaps}
-                                    initialMap="Ascent"
-                                    onMapChange={(map) => console.log("Selected map:", map)}
-                                />
-
-                                <DifficultySelector
-                                    title={translations.difficulties}
-                                    availableDifficulties={availableDifficulties}
-                                    initialDifficulty="Easy"
-                                    onDifficultyChange={(difficulty) => console.log("Selected difficulty:", difficulty)}
-                                />
-
-                                <SliderRounds title={translations.rounds}/>
-
-                                <Button
-                                    type="submit"
-                                    variant="primary"
-                                >
-                                    {translations.buttons.startGame}
-                                </Button>
-                            </form>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full w-full gap-10">
-                                <div
-                                    className="flex md:flex-row flex-col items-center justify-center h-full w-full gap-5">
-
-                                    <div className="flex flex-col items-center justify-center h-full w-full">
-                                        <h3 className="text-lg font-bold mb-3">Daily Challenge Rules</h3>
-                                        <ol className="text-sm space-y-2">
-                                            <li>Guess locations on a randomly selected map</li>
-                                            <li>5 rounds to complete</li>
-                                            <li>Hard difficulty setting</li>
-                                            <li>2 minute time limit per round</li>
-                                            <li>Leaderboard resets daily</li>
-                                        </ol>
+                                {translations.buttons.startGame}
+                            </Button>
+                        </form>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full w-full gap-8">
+                            <div className="flex items-start justify-center w-full gap-8">
+                                <div className="p-4 h-full">
+                                    <h3 className="text-lg font-bold mb-3 text-secondary text-center">Daily Challenge Rules</h3>
+                                    <div className="text-sm flex flex-col gap-2 justify-center">
+                                        <li>Guess locations on a randomly selected map</li>
+                                        <li>5 rounds to complete</li>
+                                        <li>Hard difficulty setting</li>
+                                        <li>2 minute time limit per round</li>
+                                        <li>Leaderboard resets daily</li>
                                     </div>
-
-                                    <Leaderboard leaderboard={leaderboard}/>
                                 </div>
 
-                                <Button
-                                    variant="primary"
-                                    onClick={startChallenge}>
-                                    Start Today's Challenge
-                                </Button>
+                                <Leaderboard leaderboard={leaderboard}/>
                             </div>
-                        )}
-                    </div>
+
+                            <Button
+                                variant="primary"
+                                onClick={startChallenge}>
+                                Start Today's Challenge
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <Button
-                variant="ghost"
-                size="small"
-                className="absolute bottom-4 right-4 text-secondary"
-                onClick={() => setDisplayCredits(true)}
-            >
-                Credits
-            </Button>
+            <div className="w-full flex justify-between items-center z-10 mt-auto">
+                <div className="text-sm">
+                    <p>Alpha v0.1</p>
+                    <p>Made with ❤️ by AureleJ</p>
+                </div>
+                <Button
+                    variant="ghost"
+                    size="small"
+                    onClick={() => setDisplayCredits(true)}
+                >
+                    Credits
+                </Button>
+            </div>
 
-            <Button
-                size="square"
-                className="absolute top-4 left-4 bg-secondary hover:bg-secondary-hover transition-colors"
-                onClick={() => setActiveParams(!activeParams)}
-            >
-                <FontAwesomeIcon icon="fa-solid fa-gear"/>
-            </Button>
-
-            {activeParams && (
-                <>
-                    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-30"
-                         onClick={() => setActiveParams(false)}></div>
-                    <div
-                        className="fixed z-40 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg">
-                        <Button
-                            size="square"
-                            className="absolute -top-12 right-0 z-50"
-                            onClick={() => setActiveParams(false)}
-                        >
-                            <FontAwesomeIcon icon="fa-times"/>
-                        </Button>
-                        <Params/>
-                    </div>
-                </>
-            )}
+            {displayParams && <Params setDisplayParams={setDisplayParams} setLanguage={setLanguage} getLanguage={getLanguage()}/>}
 
             {displayCredits && <Credits setDisplayCredits={setDisplayCredits}/>}
-
-            <div className="absolute bottom-4 left-4 text-[var(--primary-color)] text-sm">
-                <p>Alpha v0.1</p>
-                <p>Made with ❤️ by AureleJ</p>
-            </div>
         </div>
     );
 };

@@ -12,7 +12,7 @@ export const useGameStore = create((set, get) => ({
     availableDifficulties: ["Easy", "Medium", "Hard", "Spells"],
     maxRoundsChoice: 5,
     maxRounds: 10,
-    maxDistance: 50,
+    maxDistance: 30,
     maxScore: 5000,
 
     // Game state

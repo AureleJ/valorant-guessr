@@ -15,6 +15,7 @@ export const useLanguageStore = create((set, get) => {
         },
 
         setLanguage: (lang) => set({ language: lang }),
+        getLanguage: () => get().language,
 
         getCurrentTranslations: () => {
             const { language, translations } = get();

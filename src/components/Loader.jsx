@@ -2,10 +2,8 @@ import React from "react";
 
 export default function Loader({children}) {
     return (
-        <div className="flex h-full w-full items-center justify-center bg-[var(--background)]">
-            <div className="animate-pulse text-[var(--primary-color)] text-2xl">
-                {children}
-            </div>
+        <div className="flex w-full h-full bg-gray-800 items-center justify-center relative text-primary">
+            <p className="animate-pulse text-3xl text-primary">{children}</p>
         </div>
     );
 }

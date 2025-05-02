@@ -4,6 +4,7 @@ import { useGameStore } from "../stores/gameStore.jsx";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faExpand, faCompress, faRotate } from '@fortawesome/free-solid-svg-icons';
+import Button from "./Button.jsx";
 
 library.add(faExpand, faCompress, faRotate);
 
@@ -270,11 +271,9 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
         <div className="relative w-full h-full">
             <div
                 ref={containerRef}
-                className={`
-                bg-gray-700 p-7 rounded-lg shadow-lg border-2 border-gray-700 backdrop-blur-lg bg-opacity-50
-                 overflow-hidden aspect-square cursor-crosshair flex justify-center items-center
+                className={`bg-gray-700 p-7 rounded-lg shadow-lg border-2 border-gray-700 backdrop-blur-lg bg-opacity-50 overflow-hidden aspect-square cursor-crosshair flex justify-center items-center
                 ${
-                    fullscreen ? "fixed top-0 left-0 transform h-screen w-screen z-10 bg-black backdrop-blur-sm bg-opacity-80" : "relative w-full"
+                    fullscreen ? "fixed top-0 left-0 transform h-screen w-screen z-10 border-gray-700 backdrop-blur-sm bg-opacity-80" : "relative w-full"
                 }`}
                 onWheel={handleWheel}
                 onMouseDown={handleMouseDown}
@@ -282,12 +281,12 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
                 onTouchStart ={handleTouchStart}
             >
                 <div className="absolute z-20 top-2 left-2 flex gap-2 flex-col">
-                    <button onClick={toggleFullscreen} className="bg-[--card-background] text-white px-2 py-1 rounded">
+                    <Button onClick={toggleFullscreen} variant="secondary" size="square">
                         <FontAwesomeIcon icon={fullscreen ? "fa-solid fa-compress" : "fa-solid fa-expand"} />
-                    </button>
-                    <button onClick={resetView} className="bg-[--card-background] text-white px-2 py-1 rounded">
+                    </Button>
+                    <Button onClick={resetView} variant="secondary" size="square">
                         <FontAwesomeIcon icon="fa-solid fa-rotate" />
-                    </button>
+                    </Button>
                 </div>
                 <div
                     ref={imageRef}
@@ -332,7 +331,7 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
                                     }}
                                 />
                                 <div
-                                    className="bg-black bg-opacity-70 p-1 rounded absolute text-white text-xs"
+                                    className="bg-gray-700 bg-opacity-70 p-1 rounded absolute text-white text-xs"
                                     style={{
                                         scale: Math.max(0.3, 1 / zoom),
                                         transform: 'translate(-70%, -70%)',
@@ -351,7 +350,7 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
                                  transform: 'translate(-50%, -50%)'
                              }}>
                             <div
-                                className="bg-green-300 rounded-full"
+                                className="bg-secondary rounded-full"
                                 style={{
                                     width: `${Math.max(3, 10 / zoom)}px`,
                                     height: `${Math.max(3, 10 / zoom)}px`,
@@ -361,7 +360,7 @@ export default function InteractiveMap({ imagePath, imgCoords }) {
                     )}
                 </div>
 
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded">
+                <div className="absolute bottom-2 right-2 bg-gray-800/50 bg-opacity-70 text-white px-2 py-1 rounded">
                     Zoom: {zoom.toFixed(1)}x
                 </div>
             </div>
